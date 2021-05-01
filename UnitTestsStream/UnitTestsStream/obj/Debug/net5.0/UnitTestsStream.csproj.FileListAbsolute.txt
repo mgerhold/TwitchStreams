@@ -1,0 +1,16 @@
+C:\dev\Cs\UnitTestsStream\UnitTestsStream\bin\Debug\net5.0\UnitTestsStream.exe
+C:\dev\Cs\UnitTestsStream\UnitTestsStream\bin\Debug\net5.0\UnitTestsStream.deps.json
+C:\dev\Cs\UnitTestsStream\UnitTestsStream\bin\Debug\net5.0\UnitTestsStream.runtimeconfig.json
+C:\dev\Cs\UnitTestsStream\UnitTestsStream\bin\Debug\net5.0\UnitTestsStream.runtimeconfig.dev.json
+C:\dev\Cs\UnitTestsStream\UnitTestsStream\bin\Debug\net5.0\UnitTestsStream.dll
+C:\dev\Cs\UnitTestsStream\UnitTestsStream\bin\Debug\net5.0\ref\UnitTestsStream.dll
+C:\dev\Cs\UnitTestsStream\UnitTestsStream\bin\Debug\net5.0\UnitTestsStream.pdb
+C:\dev\Cs\UnitTestsStream\UnitTestsStream\obj\Debug\net5.0\UnitTestsStream.csprojAssemblyReference.cache
+C:\dev\Cs\UnitTestsStream\UnitTestsStream\obj\Debug\net5.0\UnitTestsStream.GeneratedMSBuildEditorConfig.editorconfig
+C:\dev\Cs\UnitTestsStream\UnitTestsStream\obj\Debug\net5.0\UnitTestsStream.AssemblyInfoInputs.cache
+C:\dev\Cs\UnitTestsStream\UnitTestsStream\obj\Debug\net5.0\UnitTestsStream.AssemblyInfo.cs
+C:\dev\Cs\UnitTestsStream\UnitTestsStream\obj\Debug\net5.0\UnitTestsStream.csproj.CoreCompileInputs.cache
+C:\dev\Cs\UnitTestsStream\UnitTestsStream\obj\Debug\net5.0\UnitTestsStream.dll
+C:\dev\Cs\UnitTestsStream\UnitTestsStream\obj\Debug\net5.0\ref\UnitTestsStream.dll
+C:\dev\Cs\UnitTestsStream\UnitTestsStream\obj\Debug\net5.0\UnitTestsStream.pdb
+C:\dev\Cs\UnitTestsStream\UnitTestsStream\obj\Debug\net5.0\UnitTestsStream.genruntimeconfig.cache
