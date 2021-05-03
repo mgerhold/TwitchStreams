@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31205.134
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ListsIteratorsIndexers", "ListsIteratorsIndexers\ListsIteratorsIndexers.csproj", "{A841B20F-12BC-49FF-8E00-1CC5787B1CD7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A841B20F-12BC-49FF-8E00-1CC5787B1CD7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A841B20F-12BC-49FF-8E00-1CC5787B1CD7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A841B20F-12BC-49FF-8E00-1CC5787B1CD7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A841B20F-12BC-49FF-8E00-1CC5787B1CD7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C31B5AA5-DC1D-47B8-A1C3-051693246375}
+	EndGlobalSection
+EndGlobal

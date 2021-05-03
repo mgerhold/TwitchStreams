@@ -1,0 +1,16 @@
+C:\dev\Cs\ListsIteratorsIndexers\ListsIteratorsIndexers\bin\Debug\net5.0\ListsIteratorsIndexers.exe
+C:\dev\Cs\ListsIteratorsIndexers\ListsIteratorsIndexers\bin\Debug\net5.0\ListsIteratorsIndexers.deps.json
+C:\dev\Cs\ListsIteratorsIndexers\ListsIteratorsIndexers\bin\Debug\net5.0\ListsIteratorsIndexers.runtimeconfig.json
+C:\dev\Cs\ListsIteratorsIndexers\ListsIteratorsIndexers\bin\Debug\net5.0\ListsIteratorsIndexers.runtimeconfig.dev.json
+C:\dev\Cs\ListsIteratorsIndexers\ListsIteratorsIndexers\bin\Debug\net5.0\ListsIteratorsIndexers.dll
+C:\dev\Cs\ListsIteratorsIndexers\ListsIteratorsIndexers\bin\Debug\net5.0\ref\ListsIteratorsIndexers.dll
+C:\dev\Cs\ListsIteratorsIndexers\ListsIteratorsIndexers\bin\Debug\net5.0\ListsIteratorsIndexers.pdb
+C:\dev\Cs\ListsIteratorsIndexers\ListsIteratorsIndexers\obj\Debug\net5.0\ListsIteratorsIndexers.csprojAssemblyReference.cache
+C:\dev\Cs\ListsIteratorsIndexers\ListsIteratorsIndexers\obj\Debug\net5.0\ListsIteratorsIndexers.GeneratedMSBuildEditorConfig.editorconfig
+C:\dev\Cs\ListsIteratorsIndexers\ListsIteratorsIndexers\obj\Debug\net5.0\ListsIteratorsIndexers.AssemblyInfoInputs.cache
+C:\dev\Cs\ListsIteratorsIndexers\ListsIteratorsIndexers\obj\Debug\net5.0\ListsIteratorsIndexers.AssemblyInfo.cs
+C:\dev\Cs\ListsIteratorsIndexers\ListsIteratorsIndexers\obj\Debug\net5.0\ListsIteratorsIndexers.csproj.CoreCompileInputs.cache
+C:\dev\Cs\ListsIteratorsIndexers\ListsIteratorsIndexers\obj\Debug\net5.0\ListsIteratorsIndexers.dll
+C:\dev\Cs\ListsIteratorsIndexers\ListsIteratorsIndexers\obj\Debug\net5.0\ref\ListsIteratorsIndexers.dll
+C:\dev\Cs\ListsIteratorsIndexers\ListsIteratorsIndexers\obj\Debug\net5.0\ListsIteratorsIndexers.pdb
+C:\dev\Cs\ListsIteratorsIndexers\ListsIteratorsIndexers\obj\Debug\net5.0\ListsIteratorsIndexers.genruntimeconfig.cache
