@@ -7,9 +7,9 @@ using namespace std;
 int main() {
 	std::cout << "COLA that contains unique_ptr instances\n";
 	COLA<std::unique_ptr<int>> colaPtrs;
-	auto ptr = std::make_unique<int>();
-	*ptr = 42;
+	auto ptr = std::make_unique<int>(42);	
 	colaPtrs.insert(std::move(ptr));
+	colaPtrs.insert(std::make_unique<int>(15));
 	std::cout << colaPtrs << "\n\n";
 
 	std::cout << "COLA that contains integer values\n";

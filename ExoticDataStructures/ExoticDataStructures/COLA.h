@@ -18,7 +18,6 @@ public:
 	}
 
 	void insert(ElementType&& elementToInsert) {
-		std::cout << "insert(ElementType&& elementToInsert)\n";
 		if (mCapacity < mNumElements + 1) {
 			grow();
 		}
@@ -45,7 +44,6 @@ public:
 	}
 
 	void insert(const ElementType& elementToInsert) {
-		std::cout << "insert(const ElementType& elementToInsert)\n";
 		if (mCapacity < mNumElements + 1) {
 			grow();
 		}
