@@ -17,55 +17,23 @@ public:
 		return mCapacity;
 	}
 
+	template<typename... Args>
+	void emplace(Args&&... args) {
+		std::vector<ElementType> overflow;
+		overflow.emplace_back(std::forward<Args>(args)...);
+		insertImplementation(std::move(overflow));
+	}
+
 	void insert(ElementType&& elementToInsert) {
-		if (mCapacity < mNumElements + 1) {
-			grow();
-		}
-		std::size_t n = mNumElements;
 		std::vector<ElementType> overflow;
 		overflow.push_back(std::move(elementToInsert));
-		for (std::size_t level = 0; level < mData.size(); ++level) {
-			if (!(n & 0b0001)) {
-				mData.at(level) = std::move(overflow);
-				overflow.clear();
-				break;
-			}
-			std::size_t overflowSize = overflow.size();
-			overflow.insert(overflow.end(),
-				std::make_move_iterator(mData.at(level).begin()),
-				std::make_move_iterator(mData.at(level).end()));
-			mData.at(level).clear();
-			std::inplace_merge(overflow.begin(),
-				overflow.begin() + overflowSize,
-				overflow.end());
-			n >>= 1;
-		}
-		++mNumElements;
+		insertImplementation(std::move(overflow));
 	}
 
 	void insert(const ElementType& elementToInsert) {
-		if (mCapacity < mNumElements + 1) {
-			grow();
-		}
-		std::size_t n = mNumElements;
-		std::vector<ElementType> overflow{ elementToInsert };
-		for (std::size_t level = 0; level < mData.size(); ++level) {
-			if (!(n & 0b0001)) {
-				mData.at(level) = std::move(overflow);
-				overflow.clear();
-				break;
-			}			
-			std::size_t overflowSize = overflow.size();
-			overflow.insert(overflow.end(),
-				std::make_move_iterator(mData.at(level).begin()),
-				std::make_move_iterator(mData.at(level).end()));
-			mData.at(level).clear();
-			std::inplace_merge(overflow.begin(),
-				overflow.begin() + overflowSize,
-				overflow.end());
-			n >>= 1;
-		}
-		++mNumElements;
+		std::vector<ElementType> overflow;
+		overflow.emplace_back(elementToInsert);
+		insertImplementation(std::move(overflow));
 	}
 
 	ElementType& find(const ElementType& needle) {
@@ -88,6 +56,30 @@ public:
 	}
 
 private:
+	void insertImplementation(std::vector<ElementType>&& overflow) {
+		if (mCapacity < mNumElements + 1) {
+			grow();
+		}
+		std::size_t n = mNumElements;
+		for (std::size_t level = 0; level < mData.size(); ++level) {
+			if (!(n & 0b0001)) {
+				mData.at(level) = std::move(overflow);
+				overflow.clear();
+				break;
+			}
+			const std::size_t overflowSize = overflow.size();
+			overflow.insert(overflow.end(),
+				std::make_move_iterator(mData.at(level).begin()),
+				std::make_move_iterator(mData.at(level).end()));
+			mData.at(level).clear();
+			std::inplace_merge(overflow.begin(),
+				overflow.begin() + overflowSize,
+				overflow.end());
+			n >>= 1;
+		}
+		++mNumElements;
+	}
+
 	void grow() {
 		if (mCapacity == 0) {
 			mData.emplace_back().reserve(1);

@@ -42,6 +42,8 @@ int main() {
 	} catch (...) {
 		std::cout << "value not found\n";
 	}
+	cola.emplace(3);
+	std::cout << cola << "==============\n";
 
 	std::cin.get();
 }
