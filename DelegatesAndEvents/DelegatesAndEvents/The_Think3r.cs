@@ -10,13 +10,13 @@ namespace DelegatesAndEvents
     {
         public void OnElapsedSeconds(int numberOfSeconds)
         {
-            if (numberOfSeconds == 12)
+            if (numberOfSeconds == 13)
             {
-                Console.WriteLine("Ich mache einen Rissuntersuchung!");
+                Console.WriteLine("Ich unterziehe die Innenseiten meiner Augenlider einer Rissprüfung!");
             }
-            else if (numberOfSeconds == 13)
+            else if (numberOfSeconds == 15)
             {
-                Console.WriteLine("Re");
+                Console.WriteLine("Rissprüfung erfolgreich abgeschlossen! Resultat: Keine Risse gefunden!");
             }
         }
 
