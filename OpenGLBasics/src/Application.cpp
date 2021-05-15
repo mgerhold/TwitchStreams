@@ -5,16 +5,16 @@
 #include "Application.hpp"
 #include <iostream>
 
-Application::Application(const WindowTitle &title, WindowSize size, OpenGLVersion version) noexcept {
+Application::Application(const std::string& title, WindowSize size, OpenGLVersion version) noexcept {
     glfwInit();
 #ifdef __APPLE__
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, value_of(version.major));
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, value_of(version.minor));
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, version.major);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, version.minor);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
-    windowPtr = glfwCreateWindow(value_of(size.width), value_of(size.height), value_of(title).c_str(), nullptr, nullptr);
+    windowPtr = glfwCreateWindow(size.width, size.height, title.c_str(), nullptr, nullptr);
     if (windowPtr == nullptr) {
         glfwTerminate();
         error = true;

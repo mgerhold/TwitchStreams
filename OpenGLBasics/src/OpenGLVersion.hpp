@@ -4,12 +4,7 @@
 
 #pragma once
 
-#include "strong_type/strong_type.hpp"
-
-using OpenGLMajorVersion = strong::type<int, struct OpenGLMajorVersion_>;
-using OpenGLMinorVersion = strong::type<int, struct OpenGLMinorVersion_>;
-
 struct OpenGLVersion {
-    OpenGLMajorVersion major;
-    OpenGLMinorVersion minor;
+    int major;
+    int minor;
 };

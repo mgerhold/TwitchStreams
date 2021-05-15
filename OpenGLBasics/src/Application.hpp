@@ -4,19 +4,15 @@
 
 #pragma once
 
-
-#include "strong_type/strong_type.hpp"
 #include "WindowSize.hpp"
 #include "OpenGLVersion.hpp"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <string>
 
-using WindowTitle = strong::type<std::string, struct WindowTitle_>;
-
 class Application {
 public:
-    Application(const WindowTitle& title, WindowSize size, OpenGLVersion version) noexcept;
+    Application(const std::string& title, WindowSize size, OpenGLVersion version) noexcept;
     Application(const Application&) = delete;
     Application(Application&&) = delete;
 
