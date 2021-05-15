@@ -1,0 +1,2 @@
+Ein sehr zu empfehlendes OpenGL-Tutorial: https://learnopengl.com/
+OpenGL-Dokumentation: http://docs.gl/

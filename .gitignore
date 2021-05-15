@@ -4,3 +4,6 @@ DelegatesAndEvents/.vs/
 DelegatesAndEvents/DelegatesAndEvents/bin/Debug/DelegatesAndEvents.exe
 DelegatesAndEvents/DelegatesAndEvents/bin/
 DelegatesAndEvents/DelegatesAndEvents/obj/
+OpenGLBasics/.idea/
+OpenGLBasics/cmake-build-debug/
+OpenGLBasics/cmake-build-release/
