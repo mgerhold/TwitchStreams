@@ -17,7 +17,7 @@ public:
     ElementBufferObject& operator=(const ElementBufferObject&) = delete;
     ElementBufferObject& operator=(ElementBufferObject&& other) noexcept;
 
-    virtual ~ElementBufferObject();
+    ~ElementBufferObject();
 
     [[nodiscard]] std::size_t count() const noexcept { return numIndices; }
     void submitData(const std::vector<GLuint>& indices, GLDataUsagePattern dataUsagePattern) noexcept;

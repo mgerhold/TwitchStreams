@@ -16,7 +16,7 @@ public:
     ShaderProgram& operator=(const ShaderProgram&) = delete;
     ShaderProgram& operator=(ShaderProgram&& other) noexcept;
 
-    virtual ~ShaderProgram();
+    ~ShaderProgram();
 
     void compile(std::string_view vertexShaderSource, std::string_view fragmentShaderSource) noexcept;
     void bind() const noexcept;

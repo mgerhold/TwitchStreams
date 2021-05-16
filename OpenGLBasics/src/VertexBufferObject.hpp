@@ -15,7 +15,7 @@ public:
     VertexBufferObject(VertexBufferObject&& other) noexcept; // move constructor
     VertexBufferObject& operator=(const VertexBufferObject&) = delete; // copy assignment
     VertexBufferObject& operator=(VertexBufferObject&& other) noexcept; // move assignment
-    virtual ~VertexBufferObject(); // destructor
+    ~VertexBufferObject(); // destructor
 
     void bind() const noexcept;
     static void unbind() noexcept;

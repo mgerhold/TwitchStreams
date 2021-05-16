@@ -10,13 +10,13 @@
 #include "VertexArrayObject.hpp"
 #include "ElementBufferObject.hpp"
 
-class Sandbox : public Application {
+class Sandbox final : public Application<Sandbox> {
 public:
     using Application::Application;
+    void setup();
+    void update();
 
 private:
-    void setup() override;
-    void update() override;
     void processInput() noexcept;
     void render() noexcept;
     void setupShaders() noexcept;

@@ -16,7 +16,7 @@ endif()
 
 set (TARGET_NAME OpenGLBasics)
 
-add_executable(${TARGET_NAME} src/main.cpp src/Application.cpp src/Application.hpp src/strong_type/strong_type.hpp src/WindowSize.hpp src/OpenGLVersion.hpp src/Sandbox.cpp src/Sandbox.hpp src/VertexBufferObject.cpp src/VertexBufferObject.hpp src/GLDataUsagePattern.hpp src/ShaderProgram.cpp src/ShaderProgram.hpp src/VertexArrayObject.cpp src/VertexArrayObject.hpp src/VertexAttributeDefinition.hpp src/GlUtils.cpp src/GlUtils.hpp src/ElementBufferObject.cpp src/ElementBufferObject.hpp)
+add_executable(${TARGET_NAME} src/main.cpp src/Application.hpp src/Application.inc src/strong_type/strong_type.hpp src/WindowSize.hpp src/OpenGLVersion.hpp src/Sandbox.cpp src/Sandbox.hpp src/VertexBufferObject.cpp src/VertexBufferObject.hpp src/GLDataUsagePattern.hpp src/ShaderProgram.cpp src/ShaderProgram.hpp src/VertexArrayObject.cpp src/VertexArrayObject.hpp src/VertexAttributeDefinition.hpp src/GlUtils.cpp src/GlUtils.hpp src/ElementBufferObject.cpp src/ElementBufferObject.hpp)
 
 # set warning levels
 if (MSVC)

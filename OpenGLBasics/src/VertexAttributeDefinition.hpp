@@ -6,7 +6,7 @@
 
 #include <glad/glad.h>
 
-struct VertexAttributeDefinition final {
+struct VertexAttributeDefinition {
     VertexAttributeDefinition(GLint count, GLenum type, GLboolean normalized) noexcept
         : count(count), type(type), normalized(normalized) {}
 

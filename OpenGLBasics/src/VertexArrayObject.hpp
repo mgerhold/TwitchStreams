@@ -20,7 +20,7 @@ public:
     VertexArrayObject& operator=(const VertexArrayObject&) = delete;
     VertexArrayObject& operator=(VertexArrayObject&& other) noexcept;
 
-    virtual ~VertexArrayObject();
+    ~VertexArrayObject();
 
     void bind() const noexcept;
     static void unbind() noexcept;
