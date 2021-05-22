@@ -5,27 +5,30 @@
 #pragma once
 
 #include "Application.hpp"
-#include "VertexBufferObject.hpp"
 #include "ShaderProgram.hpp"
-#include "VertexArrayObject.hpp"
 #include "ElementBufferObject.hpp"
+#include "VertexBuffer.hpp"
 
 class Sandbox final : public Application<Sandbox> {
 public:
     using Application::Application;
+
+private:
     void setup();
     void update();
 
-private:
     void processInput() noexcept;
     void render() noexcept;
     void setupShaders() noexcept;
 
 private:
-    VertexBufferObject vertexBufferObject;
+    //VertexBufferObject vertexBufferObject;
+    VertexBuffer vertexBuffer;
     ShaderProgram shaderProgram;
-    VertexArrayObject vertexArrayObject;
+    //VertexArrayObject vertexArrayObject;
     ElementBufferObject elementBufferObject;
+
+    friend class Application;
 };
 
 

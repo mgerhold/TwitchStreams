@@ -8,8 +8,8 @@
 void Sandbox::setup() {
     setupShaders();
 
-    vertexArrayObject.bind();
-    vertexBufferObject.bind();
+    /*vertexArrayObject.bind();
+    vertexBufferObject.bind();*/
     const std::vector<GLfloat> vertices {
             // position         // color
             -0.9f, 0.9f,        1.0f, 0.0f, 0.0f, // top left 0
@@ -28,12 +28,16 @@ void Sandbox::setup() {
             4, 5, 6,
             6, 7, 4,
     };
-    vertexBufferObject.submitData(vertices, GLDataUsagePattern::StaticDraw);
+    vertexBuffer.bind();
+    vertexBuffer.setVertexLayout(VertexAttributeDefinition{ 2, GL_FLOAT, false },
+                                 VertexAttributeDefinition{ 3, GL_FLOAT, false });
+    vertexBuffer.submitData(vertices, GLDataUsagePattern::StaticDraw);
+    //vertexBufferObject.submitData(vertices, GLDataUsagePattern::StaticDraw);
     elementBufferObject.submitData(indices, GLDataUsagePattern::StaticDraw);
-    vertexArrayObject.setVertexAttributes(
+    /*vertexArrayObject.setVertexAttributes(
             VertexAttributeDefinition{ 2, GL_FLOAT, false },
             VertexAttributeDefinition{ 3, GL_FLOAT, false }
-        );
+        );*/
     shaderProgram.bind();
 }
 
