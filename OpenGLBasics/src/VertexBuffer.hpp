@@ -26,7 +26,7 @@ public:
     void bind() const noexcept;
     static void unbind() noexcept;
 
-    void setVertexLayout(std::convertible_to<VertexAttributeDefinition>auto... args) const;
+    void setVertexAttributeLayout(std::convertible_to<VertexAttributeDefinition>auto... args) const;
     void submitData(const std::vector<GLfloat>& vertices, GLDataUsagePattern dataUsagePattern) const noexcept;
 
 private:
@@ -38,7 +38,7 @@ private:
     GLuint vertexBufferObjectName{ 0u };
 };
 
-void VertexBuffer::setVertexLayout(std::convertible_to<VertexAttributeDefinition> auto... args) const {
+void VertexBuffer::setVertexAttributeLayout(std::convertible_to<VertexAttributeDefinition> auto... args) const {
     bind();
     auto values = { args... };
     GLuint location {0U };

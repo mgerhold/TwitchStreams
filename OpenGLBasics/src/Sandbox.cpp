@@ -29,8 +29,8 @@ void Sandbox::setup() {
             6, 7, 4,
     };
     vertexBuffer.bind();
-    vertexBuffer.setVertexLayout(VertexAttributeDefinition{ 2, GL_FLOAT, false },
-                                 VertexAttributeDefinition{ 3, GL_FLOAT, false });
+    vertexBuffer.setVertexAttributeLayout(VertexAttributeDefinition{2, GL_FLOAT, false},
+                                          VertexAttributeDefinition{3, GL_FLOAT, false});
     vertexBuffer.submitData(vertices, GLDataUsagePattern::StaticDraw);
     //vertexBufferObject.submitData(vertices, GLDataUsagePattern::StaticDraw);
     elementBufferObject.submitData(indices, GLDataUsagePattern::StaticDraw);
