@@ -5,25 +5,25 @@
 #include "VertexBuffer.hpp"
 
 VertexBuffer::VertexBuffer() noexcept{
-    glGenVertexArrays(1U, &vertexArrayObjectName);
-    glGenBuffers(1U, &vertexBufferObjectName);
+    glGenVertexArrays(1U, &mVertexArrayObjectName);
+    glGenBuffers(1U, &mVertexBufferObjectName);
 }
 
 VertexBuffer::VertexBuffer(VertexBuffer &&other) noexcept {
     using std::swap;
-    swap(vertexArrayObjectName, other.vertexArrayObjectName);
-    swap(vertexBufferObjectName, other.vertexBufferObjectName);
+    swap(mVertexArrayObjectName, other.mVertexArrayObjectName);
+    swap(mVertexBufferObjectName, other.mVertexBufferObjectName);
 }
 
 VertexBuffer::~VertexBuffer() {
-    glDeleteBuffers(1U, &vertexBufferObjectName);
-    glDeleteVertexArrays(1U, &vertexArrayObjectName);
+    glDeleteBuffers(1U, &mVertexBufferObjectName);
+    glDeleteVertexArrays(1U, &mVertexArrayObjectName);
 }
 
 VertexBuffer &VertexBuffer::operator=(VertexBuffer &&other) noexcept {
     using std::swap;
-    swap(vertexArrayObjectName, other.vertexArrayObjectName);
-    swap(vertexBufferObjectName, other.vertexBufferObjectName);
+    swap(mVertexArrayObjectName, other.mVertexArrayObjectName);
+    swap(mVertexBufferObjectName, other.mVertexBufferObjectName);
     return *this;
 }
 
@@ -38,11 +38,11 @@ void VertexBuffer::unbind() noexcept {
 }
 
 void VertexBuffer::bindVertexArrayObject() const noexcept {
-    glBindVertexArray(vertexArrayObjectName);
+    glBindVertexArray(mVertexArrayObjectName);
 }
 
 void VertexBuffer::bindVertexBufferObject() const noexcept {
-    glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObjectName);
+    glBindBuffer(GL_ARRAY_BUFFER, mVertexBufferObjectName);
 }
 
 void VertexBuffer::submitData(const std::vector<GLfloat> &vertices,

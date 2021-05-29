@@ -8,28 +8,29 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <fstream>
 #include <streambuf>
+#include <format>
 
 ShaderProgram::ShaderProgram(ShaderProgram &&other) noexcept {
     using std::swap;
-    swap(name, other.name);
+    swap(mName, other.mName);
     swap(mUniformLocations, other.mUniformLocations);
 }
 
 ShaderProgram &ShaderProgram::operator=(ShaderProgram &&other) noexcept {
     using std::swap;
-    swap(name, other.name);
+    swap(mName, other.mName);
     swap(mUniformLocations, other.mUniformLocations);
     return *this;
 }
 
 ShaderProgram::~ShaderProgram() {
-    glDeleteProgram(name);
+    glDeleteProgram(mName);
 }
 
 bool ShaderProgram::compile(std::string_view vertexShaderSource, std::string_view fragmentShaderSource) noexcept {
     if (hasBeenCompiled()) {
-        glDeleteProgram(name);
-        name = 0U;
+        glDeleteProgram(mName);
+        mName = 0U;
     }
     GLuint vertexShaderName = glCreateShader(GL_VERTEX_SHADER);
     const GLchar* vertexShaderSourcesArray[] = { vertexShaderSource.data() };
@@ -58,18 +59,18 @@ bool ShaderProgram::compile(std::string_view vertexShaderSource, std::string_vie
         return false;
     }
 
-    this->name = glCreateProgram();
-    glAttachShader(this->name, vertexShaderName);
-    glAttachShader(this->name, fragmentShaderName);
-    glLinkProgram(this->name);
+    this->mName = glCreateProgram();
+    glAttachShader(this->mName, vertexShaderName);
+    glAttachShader(this->mName, fragmentShaderName);
+    glLinkProgram(this->mName);
 
-    glGetProgramiv(this->name, GL_LINK_STATUS, &success);
+    glGetProgramiv(this->mName, GL_LINK_STATUS, &success);
     if (!success) {
-        glGetProgramInfoLog(this->name, sizeof(infoLog), nullptr, infoLog);
+        glGetProgramInfoLog(this->mName, sizeof(infoLog), nullptr, infoLog);
         spdlog::error("Failed to link shader program: {}", infoLog);
         glDeleteShader(vertexShaderName);
         glDeleteShader(fragmentShaderName);
-        glDeleteProgram(this->name);
+        glDeleteProgram(this->mName);
         return false;
     }
 
@@ -81,7 +82,7 @@ bool ShaderProgram::compile(std::string_view vertexShaderSource, std::string_vie
 }
 
 void ShaderProgram::bind() const noexcept {
-    glUseProgram(name);
+    glUseProgram(mName);
 }
 
 void ShaderProgram::unbind() noexcept {
@@ -91,7 +92,15 @@ void ShaderProgram::unbind() noexcept {
 tl::expected<ShaderProgram, std::string> ShaderProgram::generateFromFiles(const std::filesystem::path &vertexShaderPath,
                                                                           const std::filesystem::path &fragmentShaderPath) {
     using namespace std::literals::string_literals;
-    auto readStringFromFile = [](const std::filesystem::path& path) {
+    if (!exists(vertexShaderPath)) {
+        return tl::unexpected(std::format("Vertex shader source file not found (filename was {}).",
+                                          vertexShaderPath.string()));
+    }
+    if (!exists(fragmentShaderPath)) {
+        return tl::unexpected(std::format("Fragment shader source file not found (filename was {}).",
+                                          fragmentShaderPath.string()));
+    }
+    const auto readStringFromFile = [](const std::filesystem::path& path) {
         std::ifstream vertexShaderFileStream{ path };
         return std::string{
                 std::istreambuf_iterator<char>{vertexShaderFileStream},
@@ -121,7 +130,7 @@ void ShaderProgram::setUniform(std::size_t uniformNameHash, const glm::mat4 &mat
 
 void ShaderProgram::cacheUniformLocations() noexcept {
     GLint uniform_count = 0;
-    glGetProgramiv(this->name, GL_ACTIVE_UNIFORMS, &uniform_count);
+    glGetProgramiv(this->mName, GL_ACTIVE_UNIFORMS, &uniform_count);
 
     if (uniform_count != 0)
     {
@@ -129,15 +138,15 @@ void ShaderProgram::cacheUniformLocations() noexcept {
         GLsizei length = 0;
         GLsizei count = 0;
         GLenum 	type = GL_NONE;
-        glGetProgramiv(this->name, GL_ACTIVE_UNIFORM_MAX_LENGTH, &max_name_len);
+        glGetProgramiv(this->mName, GL_ACTIVE_UNIFORM_MAX_LENGTH, &max_name_len);
 
         auto uniform_name = std::make_unique<char[]>(max_name_len);
 
         for (GLint i = 0; i < uniform_count; ++i)
         {
-            glGetActiveUniform(this->name, i, max_name_len, &length, &count, &type, uniform_name.get());
+            glGetActiveUniform(this->mName, i, max_name_len, &length, &count, &type, uniform_name.get());
 
-            GLint location = glGetUniformLocation(this->name, uniform_name.get());
+            GLint location = glGetUniformLocation(this->mName, uniform_name.get());
 
             const std::size_t hash = hashString(std::string_view{
                     uniform_name.get(),

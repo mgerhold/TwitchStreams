@@ -34,8 +34,8 @@ private:
     void bindVertexBufferObject() const noexcept;
 
 private:
-    GLuint vertexArrayObjectName{ 0u };
-    GLuint vertexBufferObjectName{ 0u };
+    GLuint mVertexArrayObjectName{ 0u };
+    GLuint mVertexBufferObjectName{ 0u };
 };
 
 void VertexBuffer::setVertexAttributeLayout(std::convertible_to<VertexAttributeDefinition> auto... args) const {

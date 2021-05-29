@@ -22,9 +22,9 @@ private:
     void setupShaders() noexcept;
 
 private:
-    VertexBuffer vertexBuffer;
-    ShaderProgram shaderProgram;
-    ElementBufferObject elementBufferObject;
+    VertexBuffer mVertexBuffer;
+    ShaderProgram mShaderProgram;
+    ElementBufferObject mElementBufferObject;
 
     friend class Application;
 };

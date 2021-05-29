@@ -19,14 +19,14 @@ public:
 
     ~ElementBufferObject();
 
-    [[nodiscard]] std::size_t count() const noexcept { return numIndices; }
+    [[nodiscard]] std::size_t count() const noexcept { return mNumIndices; }
     void submitData(const std::vector<GLuint>& indices, GLDataUsagePattern dataUsagePattern) noexcept;
     void bind() const noexcept;
     static void unbind() noexcept;
 
 private:
-    GLuint name{ 0U };
-    std::size_t numIndices{ 0U };
+    GLuint mName{ 0U };
+    std::size_t mNumIndices{ 0U };
 };
 
 

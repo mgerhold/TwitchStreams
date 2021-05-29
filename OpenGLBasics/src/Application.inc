@@ -11,19 +11,19 @@ Application<DerivedType>::Application(const std::string &title, WindowSize size,
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, version.minor);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
-    windowPtr = glfwCreateWindow(size.width, size.height, title.c_str(), nullptr, nullptr);
-    if (windowPtr == nullptr) {
+    mWindowPtr = glfwCreateWindow(size.width, size.height, title.c_str(), nullptr, nullptr);
+    if (mWindowPtr == nullptr) {
         glfwTerminate();
-        error = true;
+        mError = true;
         return;
     }
-    glfwMakeContextCurrent(windowPtr);
-    glfwSetFramebufferSizeCallback(windowPtr, [](GLFWwindow*, int width, int height) {
+    glfwMakeContextCurrent(mWindowPtr);
+    glfwSetFramebufferSizeCallback(mWindowPtr, [](GLFWwindow*, int width, int height) {
         glViewport(0, 0, width, height);
     });
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         glfwTerminate();
-        error = true;
+        mError = true;
         return;
     }
     int flags;
@@ -40,23 +40,23 @@ Application<DerivedType>::Application(const std::string &title, WindowSize size,
 template<typename DerivedType>
 void Application<DerivedType>::run() noexcept {
     static_cast<DerivedType *>(this)->setup();
-    while (!glfwWindowShouldClose(windowPtr)) {
+    while (!glfwWindowShouldClose(mWindowPtr)) {
         static_cast<DerivedType *>(this)->update();
-        glfwSwapBuffers(windowPtr);
+        glfwSwapBuffers(mWindowPtr);
         glfwPollEvents();
     }
 }
 
 template<typename DerivedType>
 Application<DerivedType>::~Application() {
-    glfwDestroyWindow(windowPtr);
+    glfwDestroyWindow(mWindowPtr);
     glfwTerminate();
 }
 
 template<typename DerivedType>
 void Application<DerivedType>::handleOpenGLDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity,
                                                        GLsizei, const char *message, const void *) {
-    // ignore non-significant error/warning codes
+    // ignore non-significant mError/warning codes
     if(id == 131169 || id == 131185 || id == 131218 || id == 131204) return;
 
     std::cout << "---------------" << std::endl;
@@ -101,6 +101,6 @@ void Application<DerivedType>::handleOpenGLDebugOutput(GLenum source, GLenum typ
 template<typename DerivedType>
 WindowSize Application<DerivedType>::getFramebufferSize() const {
     WindowSize result;
-    glfwGetFramebufferSize(windowPtr, &result.width, &result.height);
+    glfwGetFramebufferSize(mWindowPtr, &result.width, &result.height);
     return result;
 }
