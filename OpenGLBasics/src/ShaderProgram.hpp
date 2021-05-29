@@ -36,6 +36,9 @@ private:
 private:
     GLuint mName{0U };
     std::unordered_map<std::size_t, GLint> mUniformLocations;
+#ifndef NDEBUG
+    std::unordered_map<std::size_t, std::string> mUniformNames;
+#endif
 };
 
 

@@ -7,8 +7,7 @@ out vec3 fragmentColor;
 
 uniform mat4 projectionMatrix;
 
-void main()
-{
+void main() {
    gl_Position = projectionMatrix * vec4(aPos.x, aPos.y, 0.0, 1.0);
    fragmentColor = aColor;
 }

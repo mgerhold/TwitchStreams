@@ -122,7 +122,11 @@ void ShaderProgram::setUniform(std::size_t uniformNameHash, const glm::mat4 &mat
     const auto it = mUniformLocations.find(uniformNameHash);
 
     if (it == mUniformLocations.cend()) {
+#ifdef NDEBUG
         spdlog::error("Could not set uniform because the hash value {} could not be found.", uniformNameHash);
+#else
+        spdlog::error("Could not set uniform \"{}\" since it could not be found.", Hash::getStringFromHash(uniformNameHash));
+#endif
         return;
     }
     glUniformMatrix4fv(it->second, 1, false, glm::value_ptr(matrix));
@@ -148,11 +152,14 @@ void ShaderProgram::cacheUniformLocations() noexcept {
 
             GLint location = glGetUniformLocation(this->mName, uniform_name.get());
 
-            const std::size_t hash = hashString(std::string_view{
+            const std::size_t hash = Hash::hashString(std::string_view{
                     uniform_name.get(),
                     static_cast<std::size_t>(length) });
             mUniformLocations[hash] = location;
-            spdlog::info("uniform location for \"{}\" (hash: {}): {}", uniform_name.get(), hash, location);
+#ifndef NDEBUG
+            mUniformNames[hash] = std::string{ uniform_name.get() };
+#endif
+            spdlog::info("uniform location for \"{}\" (hash: {:X}): {}", uniform_name.get(), hash, location);
         }
     }
 }
