@@ -10,8 +10,9 @@ VertexBuffer::VertexBuffer() noexcept{
 }
 
 VertexBuffer::VertexBuffer(VertexBuffer &&other) noexcept {
-    std::swap(vertexArrayObjectName, other.vertexArrayObjectName);
-    std::swap(vertexBufferObjectName, other.vertexBufferObjectName);
+    using std::swap;
+    swap(vertexArrayObjectName, other.vertexArrayObjectName);
+    swap(vertexBufferObjectName, other.vertexBufferObjectName);
 }
 
 VertexBuffer::~VertexBuffer() {
@@ -20,8 +21,9 @@ VertexBuffer::~VertexBuffer() {
 }
 
 VertexBuffer &VertexBuffer::operator=(VertexBuffer &&other) noexcept {
-    std::swap(vertexArrayObjectName, other.vertexArrayObjectName);
-    std::swap(vertexBufferObjectName, other.vertexBufferObjectName);
+    using std::swap;
+    swap(vertexArrayObjectName, other.vertexArrayObjectName);
+    swap(vertexBufferObjectName, other.vertexBufferObjectName);
     return *this;
 }
 

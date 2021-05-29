@@ -16,7 +16,7 @@ endif()
 
 set (TARGET_NAME OpenGLBasics)
 
-add_executable(${TARGET_NAME} src/main.cpp src/Application.hpp src/Application.inc src/strong_type/strong_type.hpp src/WindowSize.hpp src/OpenGLVersion.hpp src/Sandbox.cpp src/Sandbox.hpp src/GLDataUsagePattern.hpp src/ShaderProgram.cpp src/ShaderProgram.hpp src/VertexAttributeDefinition.hpp src/GlUtils.cpp src/GlUtils.hpp src/ElementBufferObject.cpp src/ElementBufferObject.hpp src/VertexBuffer.cpp src/VertexBuffer.hpp)
+add_executable(${TARGET_NAME} src/main.cpp src/Application.hpp src/Application.inc src/strong_type/strong_type.hpp src/WindowSize.hpp src/OpenGLVersion.hpp src/Sandbox.cpp src/Sandbox.hpp src/GLDataUsagePattern.hpp src/ShaderProgram.cpp src/ShaderProgram.hpp src/VertexAttributeDefinition.hpp src/GlUtils.cpp src/GlUtils.hpp src/ElementBufferObject.cpp src/ElementBufferObject.hpp src/VertexBuffer.cpp src/VertexBuffer.hpp src/expected/expected.hpp src/hash/hash.hpp)
 
 # set warning levels
 if (MSVC)
@@ -42,3 +42,9 @@ target_link_libraries(${TARGET_NAME} PRIVATE glad::glad)
 
 find_package(Microsoft.GSL CONFIG REQUIRED)
 target_link_libraries(${TARGET_NAME} PRIVATE Microsoft.GSL::GSL)
+
+find_package(spdlog CONFIG REQUIRED)
+target_link_libraries(${TARGET_NAME} PRIVATE spdlog::spdlog spdlog::spdlog_header_only)
+
+find_package(glm CONFIG REQUIRED)
+target_link_libraries(${TARGET_NAME} PRIVATE glm::glm)

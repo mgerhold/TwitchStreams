@@ -4,8 +4,12 @@
 
 #pragma once
 
+#include "expected/expected.hpp"
 #include <glad/glad.h>
 #include <string_view>
+#include <filesystem>
+#include <unordered_map>
+#include <glm/glm.hpp>
 
 class ShaderProgram final {
 public:
@@ -18,13 +22,20 @@ public:
 
     ~ShaderProgram();
 
-    void compile(std::string_view vertexShaderSource, std::string_view fragmentShaderSource) noexcept;
+    [[nodiscard]] bool compile(std::string_view vertexShaderSource, std::string_view fragmentShaderSource) noexcept;
     void bind() const noexcept;
     static void unbind() noexcept;
     [[nodiscard]] bool hasBeenCompiled() const noexcept { return name != 0U; }
+    static tl::expected<ShaderProgram, std::string> generateFromFiles(const std::filesystem::path &vertexShaderPath,
+                                                                      const std::filesystem::path &fragmentShaderPath);
+    void setUniform(std::size_t uniformNameHash, const glm::mat4& matrix) const noexcept;
+
+private:
+    void cacheUniformLocations() noexcept;
 
 private:
     GLuint name{ 0U };
+    std::unordered_map<std::size_t, GLint> mUniformLocations;
 };
 
 

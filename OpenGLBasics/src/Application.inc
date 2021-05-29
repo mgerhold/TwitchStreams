@@ -1,3 +1,6 @@
+
+#include "Application.hpp"
+
 template<typename DerivedType>
 Application<DerivedType>::Application(const std::string &title, WindowSize size, OpenGLVersion version) noexcept {
     glfwInit();
@@ -93,4 +96,11 @@ void Application<DerivedType>::handleOpenGLDebugOutput(GLenum source, GLenum typ
         default: break;
     } std::cout << std::endl;
     std::cout << std::endl;
+}
+
+template<typename DerivedType>
+WindowSize Application<DerivedType>::getFramebufferSize() const {
+    WindowSize result;
+    glfwGetFramebufferSize(windowPtr, &result.width, &result.height);
+    return result;
 }

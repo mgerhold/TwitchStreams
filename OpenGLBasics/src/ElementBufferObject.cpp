@@ -10,13 +10,15 @@ ElementBufferObject::ElementBufferObject() noexcept {
 }
 
 ElementBufferObject::ElementBufferObject(ElementBufferObject &&other) noexcept {
-    std::swap(name, other.name);
-    std::swap(numIndices, other.numIndices);
+    using std::swap;
+    swap(name, other.name);
+    swap(numIndices, other.numIndices);
 }
 
 ElementBufferObject &ElementBufferObject::operator=(ElementBufferObject &&other) noexcept {
-    std::swap(name, other.name);
-    std::swap(numIndices, other.numIndices);
+    using std::swap;
+    swap(name, other.name);
+    swap(numIndices, other.numIndices);
     return *this;
 }
 

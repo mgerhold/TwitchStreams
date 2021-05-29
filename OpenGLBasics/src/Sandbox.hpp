@@ -22,10 +22,8 @@ private:
     void setupShaders() noexcept;
 
 private:
-    //VertexBufferObject vertexBufferObject;
     VertexBuffer vertexBuffer;
     ShaderProgram shaderProgram;
-    //VertexArrayObject vertexArrayObject;
     ElementBufferObject elementBufferObject;
 
     friend class Application;

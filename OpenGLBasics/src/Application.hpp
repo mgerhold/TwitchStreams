@@ -24,6 +24,7 @@ public:
 
     void run() noexcept;
     [[nodiscard]] bool hasError() const { return error; };
+    [[nodiscard]] WindowSize getFramebufferSize() const;
 
 protected:
     [[nodiscard]] inline GLFWwindow * getGLFWWindowPointer() const noexcept { return windowPtr; }
