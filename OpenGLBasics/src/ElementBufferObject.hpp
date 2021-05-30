@@ -25,6 +25,7 @@ public:
     static void unbind() noexcept;
 
 private:
+    static GLuint sCurrentlyBoundName;
     GLuint mName{ 0U };
     std::size_t mNumIndices{ 0U };
 };

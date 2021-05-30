@@ -4,6 +4,9 @@
 
 #include "VertexBuffer.hpp"
 
+GLuint VertexBuffer::sCurrentlyBoundVertexArrayObjectName{ 0u };
+GLuint VertexBuffer::sCurrentlyBoundVertexBufferObjectName{ 0u };
+
 VertexBuffer::VertexBuffer() noexcept{
     glGenVertexArrays(1U, &mVertexArrayObjectName);
     glGenBuffers(1U, &mVertexBufferObjectName);
@@ -28,13 +31,21 @@ VertexBuffer &VertexBuffer::operator=(VertexBuffer &&other) noexcept {
 }
 
 void VertexBuffer::bind() const noexcept {
-    bindVertexArrayObject();
-    bindVertexBufferObject();
+    if (sCurrentlyBoundVertexArrayObjectName != mVertexArrayObjectName) {
+        bindVertexArrayObject();
+        sCurrentlyBoundVertexArrayObjectName = mVertexArrayObjectName;
+    }
+    if (sCurrentlyBoundVertexBufferObjectName != mVertexBufferObjectName) {
+        bindVertexBufferObject();
+        sCurrentlyBoundVertexBufferObjectName = mVertexBufferObjectName;
+    }
 }
 
 void VertexBuffer::unbind() noexcept {
     glBindBuffer(GL_ARRAY_BUFFER, 0U);
     glBindVertexArray(0U);
+    sCurrentlyBoundVertexArrayObjectName = 0U;
+    sCurrentlyBoundVertexBufferObjectName = 0U;
 }
 
 void VertexBuffer::bindVertexArrayObject() const noexcept {

@@ -5,6 +5,8 @@
 #include "ElementBufferObject.hpp"
 #include <gsl/gsl>
 
+GLuint ElementBufferObject::sCurrentlyBoundName{ 0U };
+
 ElementBufferObject::ElementBufferObject() noexcept {
     glGenBuffers(1U, &mName);
 }
@@ -34,9 +36,13 @@ void ElementBufferObject::submitData(const std::vector<GLuint> &indices, GLDataU
 }
 
 void ElementBufferObject::bind() const noexcept {
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mName);
+    if (sCurrentlyBoundName != mName) {
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mName);
+        sCurrentlyBoundName = mName;
+    }
 }
 
 void ElementBufferObject::unbind() noexcept {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0U);
+    sCurrentlyBoundName = 0U;
 }

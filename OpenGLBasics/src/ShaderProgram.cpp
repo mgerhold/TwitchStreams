@@ -11,6 +11,8 @@
 //#include <format>
 #include <spdlog/fmt/fmt.h>
 
+GLuint ShaderProgram::sCurrentlyBoundName{ 0U };
+
 ShaderProgram::ShaderProgram(ShaderProgram &&other) noexcept {
     using std::swap;
     swap(mName, other.mName);
@@ -83,11 +85,15 @@ bool ShaderProgram::compile(std::string_view vertexShaderSource, std::string_vie
 }
 
 void ShaderProgram::bind() const noexcept {
-    glUseProgram(mName);
+    if (sCurrentlyBoundName != mName) {
+        glUseProgram(mName);
+        sCurrentlyBoundName = mName;
+    }
 }
 
 void ShaderProgram::unbind() noexcept {
     glUseProgram(0U);
+    sCurrentlyBoundName = 0U;
 }
 
 tl::expected<ShaderProgram, std::string> ShaderProgram::generateFromFiles(const std::filesystem::path &vertexShaderPath,
