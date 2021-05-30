@@ -1,6 +1,7 @@
 #version 430 core
 
 in vec3 fragmentColor;
+in vec3 fragmentPosition;
 out vec4 FragColor;
 
 void main() {
