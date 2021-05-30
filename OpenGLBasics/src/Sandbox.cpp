@@ -10,7 +10,7 @@
 #include <filesystem>
 #include <string_view>
 
-void Sandbox::setup() {
+void Sandbox::setup() noexcept {
     setupShaders();
 
     const glm::vec4 v0{ -100.0f, -100.0f, 0.0f, 1.0f };
@@ -34,7 +34,7 @@ void Sandbox::setup() {
     mShaderProgram.bind();
 }
 
-void Sandbox::update() {
+void Sandbox::update() noexcept {
     processInput();
     render();
 }

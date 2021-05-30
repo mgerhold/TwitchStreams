@@ -8,7 +8,8 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <fstream>
 #include <streambuf>
-#include <format>
+//#include <format>
+#include <spdlog/fmt/fmt.h>
 
 ShaderProgram::ShaderProgram(ShaderProgram &&other) noexcept {
     using std::swap;
@@ -93,12 +94,16 @@ tl::expected<ShaderProgram, std::string> ShaderProgram::generateFromFiles(const 
                                                                           const std::filesystem::path &fragmentShaderPath) {
     using namespace std::literals::string_literals;
     if (!exists(vertexShaderPath)) {
-        return tl::unexpected(std::format("Vertex shader source file not found (filename was {}).",
-                                          vertexShaderPath.string()));
+        return tl::unexpected(fmt::format("Vertex shader source file not found (filename was {}).",
+                    vertexShaderPath.string()));
+        /*return tl::unexpected(std::format("Vertex shader source file not found (filename was {}).",
+                                          vertexShaderPath.string()));*/
     }
     if (!exists(fragmentShaderPath)) {
-        return tl::unexpected(std::format("Fragment shader source file not found (filename was {}).",
+        return tl::unexpected(fmt::format("Fragment shader source file not found (filename was {}).",
                                           fragmentShaderPath.string()));
+        /*return tl::unexpected(std::format("Fragment shader source file not found (filename was {}).",
+                                          fragmentShaderPath.string()));*/
     }
     const auto readStringFromFile = [](const std::filesystem::path& path) {
         std::ifstream vertexShaderFileStream{ path };
@@ -122,11 +127,8 @@ void ShaderProgram::setUniform(std::size_t uniformNameHash, const glm::mat4 &mat
     const auto it = mUniformLocations.find(uniformNameHash);
 
     if (it == mUniformLocations.cend()) {
-#ifdef NDEBUG
-        spdlog::error("Could not set uniform because the hash value {} could not be found.", uniformNameHash);
-#else
+        //spdlog::error("Could not set uniform because the hash value {} could not be found.", uniformNameHash);
         spdlog::error("Could not set uniform \"{}\" since it could not be found.", Hash::getStringFromHash(uniformNameHash));
-#endif
         return;
     }
     glUniformMatrix4fv(it->second, 1, false, glm::value_ptr(matrix));
@@ -156,9 +158,7 @@ void ShaderProgram::cacheUniformLocations() noexcept {
                     uniform_name.get(),
                     static_cast<std::size_t>(length) });
             mUniformLocations[hash] = location;
-#ifndef NDEBUG
             mUniformNames[hash] = std::string{ uniform_name.get() };
-#endif
             spdlog::info("uniform location for \"{}\" (hash: {:X}): {}", uniform_name.get(), hash, location);
         }
     }

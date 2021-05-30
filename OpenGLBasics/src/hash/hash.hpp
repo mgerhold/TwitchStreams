@@ -4,16 +4,14 @@
 
 #pragma once
 
-#ifndef NDEBUG
+#include <string>
 #include <string_view>
 #include <unordered_map>
-#endif
 
 namespace Hash {
 
     // https://stackoverflow.com/questions/48896142/is-it-possible-to-get-hash-values-as-compile-time-constants
-    #ifdef NDEBUG
-    template <typename Str>
+    /*template <typename Str>
     constexpr size_t hashString(const Str& toHash)
     {
         // For this example, I'm requiring size_t to be 64-bit, but you could
@@ -32,16 +30,13 @@ namespace Hash {
         }
 
         return result;
-    }
-
-    #else
+    }*/
 
     [[nodiscard]] std::string_view getStringFromHash(std::size_t hash) noexcept;
 
     extern std::unordered_map<std::size_t, std::string> cachedHashNames;
 
     namespace {
-
         void cacheHashName(std::size_t hash, const std::string &name) noexcept {
             cachedHashNames[hash] = name;
         }
@@ -69,7 +64,5 @@ namespace Hash {
 
         return result;
     }
-
-    #endif
 
 }

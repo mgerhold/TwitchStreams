@@ -2,8 +2,6 @@
 // Created by coder2k on 29.05.2021.
 //
 
-#ifndef NDEBUG
-
 #include "hash.hpp"
 
 namespace Hash {
@@ -20,5 +18,3 @@ namespace Hash {
     }
 
 }
-
-#endif

@@ -1,9 +1,12 @@
 
 #include "Application.hpp"
 
+#include <spdlog/spdlog.h>
+
 template<typename DerivedType>
 Application<DerivedType>::Application(const std::string &title, WindowSize size, OpenGLVersion version) noexcept {
     glfwInit();
+    spdlog::info("glfw initialized");
 #ifdef __APPLE__
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
@@ -21,6 +24,7 @@ Application<DerivedType>::Application(const std::string &title, WindowSize size,
     glfwSetFramebufferSizeCallback(mWindowPtr, [](GLFWwindow*, int width, int height) {
         glViewport(0, 0, width, height);
     });
+    spdlog::info("glfw window created");
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         glfwTerminate();
         mError = true;
@@ -49,6 +53,7 @@ void Application<DerivedType>::run() noexcept {
 
 template<typename DerivedType>
 Application<DerivedType>::~Application() {
+    spdlog::info("exiting application");
     glfwDestroyWindow(mWindowPtr);
     glfwTerminate();
 }

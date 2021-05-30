@@ -14,8 +14,8 @@ public:
     using Application::Application;
 
 private:
-    void setup();
-    void update();
+    void setup() noexcept;
+    void update() noexcept;
 
     void processInput() noexcept;
     void render() noexcept;

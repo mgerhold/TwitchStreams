@@ -1,6 +1,5 @@
 #include "Sandbox.hpp"
 #include <cstdlib>
-#include <memory>
 
 int main() {
     Sandbox sandbox{ "OpenGL application",

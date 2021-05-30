@@ -15,3 +15,5 @@ StackVsHeap/C/cmake-build-release-mingw/
 StackVsHeap/Cs/StackVsHeap/.vs/
 StackVsHeap/Cs/StackVsHeap/StackVsHeap/bin/
 StackVsHeap/Cs/StackVsHeap/StackVsHeap/obj/
+OpenGLBasics/cmake-build-debug-remote-host/
+OpenGLBasics/cmake-build-release-remote-host/
