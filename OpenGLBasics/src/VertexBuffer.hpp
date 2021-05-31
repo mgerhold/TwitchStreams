@@ -34,8 +34,8 @@ private:
     void bindVertexBufferObject() const noexcept;
 
 private:
-    static GLuint sCurrentlyBoundVertexArrayObjectName;
-    static GLuint sCurrentlyBoundVertexBufferObjectName;
+    static inline GLuint sCurrentlyBoundVertexArrayObjectName{ 0U };
+    static inline GLuint sCurrentlyBoundVertexBufferObjectName{ 0U };
     GLuint mVertexArrayObjectName{ 0u };
     GLuint mVertexBufferObjectName{ 0u };
 };

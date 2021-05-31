@@ -32,6 +32,7 @@ void Sandbox::setup() noexcept {
     mVertexBuffer.submitData(vertices, GLDataUsagePattern::StaticDraw);
     mElementBufferObject.submitData(indices, GLDataUsagePattern::StaticDraw);
     mShaderProgram.bind();
+    glClearColor(73.f / 255.f, 54.f / 255.f, 87.f / 255.f, 1.f);
 }
 
 void Sandbox::update() noexcept {
@@ -52,7 +53,6 @@ void Sandbox::render() noexcept {
                                                     gsl::narrow_cast<float>(-framebufferSize.height / 2),
                                                     gsl::narrow_cast<float>(framebufferSize.height / 2));
     mShaderProgram.setUniform(Hash::hashString("projectionMatrix"), projectionMatrix);
-    glClearColor(73.f / 255.f, 54.f / 255.f, 87.f / 255.f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT);
     glDrawElements(GL_TRIANGLES, gsl::narrow_cast<GLsizei>(mElementBufferObject.count()),
             GL_UNSIGNED_INT, nullptr);
