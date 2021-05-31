@@ -29,8 +29,8 @@ void Sandbox::setup() noexcept {
     mVertexBuffer.bind();
     mVertexBuffer.setVertexAttributeLayout(VertexAttributeDefinition{2, GL_FLOAT, false},
                                            VertexAttributeDefinition{3, GL_FLOAT, false});
-    mVertexBuffer.submitData(vertices, GLDataUsagePattern::StaticDraw);
-    mElementBufferObject.submitData(indices, GLDataUsagePattern::StaticDraw);
+    mVertexBuffer.submitVertexData(vertices, GLDataUsagePattern::StaticDraw);
+    mVertexBuffer.submitIndexData(indices, GLDataUsagePattern::StaticDraw);
     mShaderProgram.bind();
     glClearColor(73.f / 255.f, 54.f / 255.f, 87.f / 255.f, 1.f);
 }
@@ -54,7 +54,7 @@ void Sandbox::render() noexcept {
                                                     gsl::narrow_cast<float>(framebufferSize.height / 2));
     mShaderProgram.setUniform(Hash::hashString("projectionMatrix"), projectionMatrix);
     glClear(GL_COLOR_BUFFER_BIT);
-    glDrawElements(GL_TRIANGLES, gsl::narrow_cast<GLsizei>(mElementBufferObject.count()),
+    glDrawElements(GL_TRIANGLES, gsl::narrow_cast<GLsizei>(mVertexBuffer.indicesCount()),
             GL_UNSIGNED_INT, nullptr);
 }
 

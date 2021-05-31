@@ -26,18 +26,27 @@ public:
     void bind() const noexcept;
     static void unbind() noexcept;
 
+    [[nodiscard]] std::size_t indicesCount() const noexcept { return mNumIndices; }
     void setVertexAttributeLayout(std::convertible_to<VertexAttributeDefinition>auto... args) const;
-    void submitData(const std::vector<GLfloat>& vertices, GLDataUsagePattern dataUsagePattern) const noexcept;
+    void submitVertexData(const std::vector<GLfloat>& vertices, GLDataUsagePattern dataUsagePattern) const noexcept;
+    void submitIndexData(const std::vector<GLuint>& indices, GLDataUsagePattern dataUsagePattern) noexcept;
 
 private:
     void bindVertexArrayObject() const noexcept;
     void bindVertexBufferObject() const noexcept;
+    void bindElementBufferObject() const noexcept;
+    static void unbindVertexArrayObject() noexcept;
+    static void unbindVertexBufferObject() noexcept;
+    static void unbindElementBufferObject() noexcept;
 
 private:
     static inline GLuint sCurrentlyBoundVertexArrayObjectName{ 0U };
     static inline GLuint sCurrentlyBoundVertexBufferObjectName{ 0U };
+    static inline GLuint sCurrentlyBoundElementBufferObjectName{ 0U };
     GLuint mVertexArrayObjectName{ 0u };
     GLuint mVertexBufferObjectName{ 0u };
+    GLuint mElementBufferObjectName{ 0U };
+    std::size_t mNumIndices{ 0U };
 };
 
 void VertexBuffer::setVertexAttributeLayout(std::convertible_to<VertexAttributeDefinition> auto... args) const {

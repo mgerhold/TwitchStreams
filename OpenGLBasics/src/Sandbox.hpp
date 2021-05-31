@@ -6,7 +6,6 @@
 
 #include "Application.hpp"
 #include "ShaderProgram.hpp"
-#include "ElementBufferObject.hpp"
 #include "VertexBuffer.hpp"
 
 class Sandbox final : public Application<Sandbox> {
@@ -24,7 +23,6 @@ private:
 private:
     VertexBuffer mVertexBuffer;
     ShaderProgram mShaderProgram;
-    ElementBufferObject mElementBufferObject;
 
     friend class Application;
 };
