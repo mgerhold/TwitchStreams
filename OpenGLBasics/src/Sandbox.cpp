@@ -3,28 +3,43 @@
 //
 
 #include "Sandbox.hpp"
+#include "Image.hpp"
 #include "hash/hash.hpp"
-#include <spdlog/spdlog.h>
 #include <glm/gtc/matrix_transform.hpp>
-#include <gsl/gsl>
 #include <filesystem>
 #include <string_view>
 
 void Sandbox::setup() noexcept {
+    auto noJavaImage = Image::LoadFromFile(
+            std::filesystem::current_path() / "assets" / "images" / "nojava2.png",
+            3);
+    if (noJavaImage) {
+        Image image = std::move(noJavaImage.value());
+        spdlog::info("Loaded image: {}x{} ({} channels)",
+                     image.getWidth(),
+                     image.getHeight(),
+                     image.getNumChannels());
+    } else {
+        spdlog::error("Could not open image: {}", noJavaImage.error());
+    }
+
     setupShaders();
 
     const glm::vec4 v0{ -100.0f, -100.0f, 0.0f, 1.0f };
     const glm::vec4 v1{ 100.0f, -100.0f, 0.0f, 1.0f };
-    const glm::vec4 v2{ 0.0f, 100.0f, 0.0f, 1.0f };
+    const glm::vec4 v2{ 100.0f, 100.0f, 0.0f, 1.0f };
+    const glm::vec4 v3{ -100.0f, 100.0f, 0.0f, 1.0f };
 
     const std::vector<GLfloat> vertices {
-            // position         // color
-            v0.x, v0.y,        1.0f, 0.0f, 0.0f, // top left 0
-            v1.x, v1.y,        0.0f, 1.0f, 0.0f, // bottom left 1
-            v2.x, v2.y,        0.0f, 0.0f, 1.0f, // bottom right 2
+            // position        // color
+            v0.x, v0.y,        1.0f, 0.0f, 0.0f, // bottom left
+            v1.x, v1.y,        0.0f, 1.0f, 0.0f, // bottom right
+            v2.x, v2.y,        0.0f, 0.0f, 1.0f, // top right
+            v3.x, v3.y,        1.0f, 0.5f, 0.0f, // top left
     };
     const std::vector<GLuint> indices {
             0, 1, 2,
+            2, 3, 0,
     };
     mVertexBuffer.bind();
     mVertexBuffer.setVertexAttributeLayout(VertexAttributeDefinition{2, GL_FLOAT, false},

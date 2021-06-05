@@ -100,14 +100,14 @@ tl::expected<ShaderProgram, std::string> ShaderProgram::generateFromFiles(const 
                                                                           const std::filesystem::path &fragmentShaderPath) {
     using namespace std::literals::string_literals;
     if (!exists(vertexShaderPath)) {
-        return tl::unexpected(fmt::format("Vertex shader source file not found (filename was {}).",
-                    vertexShaderPath.string()));
+        return tl::unexpected{ fmt::format("Vertex shader source file not found (filename was {}).",
+                    vertexShaderPath.string()) };
         /*return tl::unexpected(std::format("Vertex shader source file not found (filename was {}).",
                                           vertexShaderPath.string()));*/
     }
     if (!exists(fragmentShaderPath)) {
-        return tl::unexpected(fmt::format("Fragment shader source file not found (filename was {}).",
-                                          fragmentShaderPath.string()));
+        return tl::unexpected{ fmt::format("Fragment shader source file not found (filename was {}).",
+                                          fragmentShaderPath.string()) };
         /*return tl::unexpected(std::format("Fragment shader source file not found (filename was {}).",
                                           fragmentShaderPath.string()));*/
     }
@@ -123,7 +123,7 @@ tl::expected<ShaderProgram, std::string> ShaderProgram::generateFromFiles(const 
 
     ShaderProgram shaderProgram;
     if (!shaderProgram.compile(vertexShaderSource, fragmentShaderSource)) {
-        return tl::unexpected("Failed to create shader program."s);
+        return tl::unexpected{ "Failed to create shader program."s };
     }
     return shaderProgram;
 }
