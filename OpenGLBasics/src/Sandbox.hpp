@@ -7,6 +7,7 @@
 #include "Application.hpp"
 #include "ShaderProgram.hpp"
 #include "VertexBuffer.hpp"
+#include "Texture.hpp"
 
 class Sandbox final : public Application<Sandbox> {
 public:
@@ -23,6 +24,7 @@ private:
 private:
     VertexBuffer mVertexBuffer;
     ShaderProgram mShaderProgram;
+    Texture mTexture;
 
     friend class Application;
 };

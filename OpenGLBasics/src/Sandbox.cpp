@@ -4,23 +4,28 @@
 
 #include "Sandbox.hpp"
 #include "Image.hpp"
+#include "Texture.hpp"
 #include "hash/hash.hpp"
 #include <glm/gtc/matrix_transform.hpp>
 #include <filesystem>
 #include <string_view>
 
 void Sandbox::setup() noexcept {
-    auto noJavaImage = Image::LoadFromFile(
-            std::filesystem::current_path() / "assets" / "images" / "nojava2.png",
-            3);
-    if (noJavaImage) {
-        Image image = std::move(noJavaImage.value());
-        spdlog::info("Loaded image: {}x{} ({} channels)",
-                     image.getWidth(),
-                     image.getHeight(),
-                     image.getNumChannels());
+#ifdef DEBUG_BUILD
+    spdlog::info("This is the debug build");
+#else
+    spdlog::info("This is the release build");
+#endif
+    spdlog::info("Current path is {}", std::filesystem::current_path().string());
+    auto expectedTexture = Image::LoadFromFile(
+                std::filesystem::current_path() / "assets" / "images" / "nojava.png").
+                    and_then(Texture::Create);
+
+    if (expectedTexture) {
+        spdlog::info("Texture loaded");
+        mTexture = std::move(expectedTexture.value());
     } else {
-        spdlog::error("Could not open image: {}", noJavaImage.error());
+        spdlog::error("Failed to load texture: {}", expectedTexture.error());
     }
 
     setupShaders();
@@ -31,11 +36,11 @@ void Sandbox::setup() noexcept {
     const glm::vec4 v3{ -100.0f, 100.0f, 0.0f, 1.0f };
 
     const std::vector<GLfloat> vertices {
-            // position        // color
-            v0.x, v0.y,        1.0f, 0.0f, 0.0f, // bottom left
-            v1.x, v1.y,        0.0f, 1.0f, 0.0f, // bottom right
-            v2.x, v2.y,        0.0f, 0.0f, 1.0f, // top right
-            v3.x, v3.y,        1.0f, 0.5f, 0.0f, // top left
+            // position        // color             // UVs
+            v0.x, v0.y,        1.0f, 0.0f, 0.0f,    0.0f, 0.0f,     // bottom left
+            v1.x, v1.y,        0.0f, 1.0f, 0.0f,    1.0f, 0.0f,     // bottom right
+            v2.x, v2.y,        0.0f, 0.0f, 1.0f,    1.0f, 1.0f,     // top right
+            v3.x, v3.y,        1.0f, 0.5f, 0.0f,    0.0f, 1.0f      // top left
     };
     const std::vector<GLuint> indices {
             0, 1, 2,
@@ -43,7 +48,8 @@ void Sandbox::setup() noexcept {
     };
     mVertexBuffer.bind();
     mVertexBuffer.setVertexAttributeLayout(VertexAttributeDefinition{2, GL_FLOAT, false},
-                                           VertexAttributeDefinition{3, GL_FLOAT, false});
+                                           VertexAttributeDefinition{3, GL_FLOAT, false},
+                                           VertexAttributeDefinition{2, GL_FLOAT, false});
     mVertexBuffer.submitVertexData(vertices, GLDataUsagePattern::StaticDraw);
     mVertexBuffer.submitIndexData(indices, GLDataUsagePattern::StaticDraw);
     mShaderProgram.bind();

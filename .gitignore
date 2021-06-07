@@ -17,3 +17,8 @@ StackVsHeap/Cs/StackVsHeap/StackVsHeap/bin/
 StackVsHeap/Cs/StackVsHeap/StackVsHeap/obj/
 OpenGLBasics/cmake-build-debug-remote-host/
 OpenGLBasics/cmake-build-release-remote-host/
+TemplateMetaProgramming/cmake-build-debug/
+TemplateMetaProgramming/cmake-build-release/
+TemplateMetaProgramming/cmake-build-debug-remote-host/
+TemplateMetaProgramming/cmake-build-release-remote-host/
+TemplateMetaProgramming/.idea/
