@@ -17,7 +17,7 @@ endif()
 
 set (TARGET_NAME OpenGLBasics)
 
-add_executable(${TARGET_NAME} src/main.cpp src/Application.hpp src/Application.inc src/strong_type/strong_type.hpp src/WindowSize.hpp src/OpenGLVersion.hpp src/Sandbox.cpp src/Sandbox.hpp src/GLDataUsagePattern.hpp src/ShaderProgram.cpp src/ShaderProgram.hpp src/VertexAttributeDefinition.hpp src/GlUtils.cpp src/GlUtils.hpp src/VertexBuffer.cpp src/VertexBuffer.hpp src/expected/expected.hpp src/hash/hash.hpp src/hash/hash.cpp src/stb_image/stb_image.h src/StbImageInclude.cpp src/Image.cpp src/Image.hpp)
+add_executable(${TARGET_NAME} src/main.cpp src/Application.hpp src/Application.inc src/strong_type/strong_type.hpp src/WindowSize.hpp src/OpenGLVersion.hpp src/Sandbox.cpp src/Sandbox.hpp src/GLDataUsagePattern.hpp src/ShaderProgram.cpp src/ShaderProgram.hpp src/VertexAttributeDefinition.hpp src/GlUtils.cpp src/GlUtils.hpp src/VertexBuffer.cpp src/VertexBuffer.hpp src/expected/expected.hpp src/hash/hash.hpp src/hash/hash.cpp src/stb_image/stb_image.h src/StbImageInclude.cpp src/Image.cpp src/Image.hpp src/Texture.cpp src/Texture.hpp)
 
 # set warning levels
 if (MSVC)
@@ -26,6 +26,7 @@ else()
     target_compile_options(${TARGET_NAME} PUBLIC -Wall -Wextra -pedantic)
 endif()
 
+target_compile_definitions(${TARGET_NAME} PUBLIC "$<$<CONFIG:DEBUG>:DEBUG_BUILD>")
 set_property(TARGET ${TARGET_NAME} PROPERTY
         MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
