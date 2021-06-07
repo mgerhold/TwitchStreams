@@ -73,7 +73,7 @@ void Sandbox::render() noexcept {
                                                     gsl::narrow_cast<float>(framebufferSize.width / 2),
                                                     gsl::narrow_cast<float>(-framebufferSize.height / 2),
                                                     gsl::narrow_cast<float>(framebufferSize.height / 2));
-    mShaderProgram.setUniform(Hash::hashString("projectionMatrix"), projectionMatrix);
+    mShaderProgram.setUniform(Hash::staticHashString("projectionMatrix"), projectionMatrix);
     glClear(GL_COLOR_BUFFER_BIT);
     glDrawElements(GL_TRIANGLES, gsl::narrow_cast<GLsizei>(mVertexBuffer.indicesCount()),
             GL_UNSIGNED_INT, nullptr);

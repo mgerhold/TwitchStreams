@@ -37,7 +37,6 @@ private:
     static GLuint sCurrentlyBoundName;
     GLuint mName{ 0U };
     std::unordered_map<std::size_t, GLint> mUniformLocations;
-    std::unordered_map<std::size_t, std::string> mUniformNames;
 };
 
 

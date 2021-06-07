@@ -102,14 +102,10 @@ tl::expected<ShaderProgram, std::string> ShaderProgram::generateFromFiles(const 
     if (!exists(vertexShaderPath)) {
         return tl::unexpected{ fmt::format("Vertex shader source file not found (filename was {}).",
                     vertexShaderPath.string()) };
-        /*return tl::unexpected(std::format("Vertex shader source file not found (filename was {}).",
-                                          vertexShaderPath.string()));*/
     }
     if (!exists(fragmentShaderPath)) {
         return tl::unexpected{ fmt::format("Fragment shader source file not found (filename was {}).",
                                           fragmentShaderPath.string()) };
-        /*return tl::unexpected(std::format("Fragment shader source file not found (filename was {}).",
-                                          fragmentShaderPath.string()));*/
     }
     const auto readStringFromFile = [](const std::filesystem::path& path) {
         std::ifstream vertexShaderFileStream{ path };
@@ -133,8 +129,11 @@ void ShaderProgram::setUniform(std::size_t uniformNameHash, const glm::mat4 &mat
     const auto it = mUniformLocations.find(uniformNameHash);
 
     if (it == mUniformLocations.cend()) {
-        //spdlog::error("Could not set uniform because the hash value {} could not be found.", uniformNameHash);
+#ifdef DEBUG_BUILD
         spdlog::error("Could not set uniform \"{}\" since it could not be found.", Hash::getStringFromHash(uniformNameHash));
+#else
+        spdlog::error("Could not set uniform because the hash value {} could not be found.", uniformNameHash);
+#endif
         return;
     }
     glUniformMatrix4fv(it->second, 1, false, glm::value_ptr(matrix));
@@ -164,8 +163,9 @@ void ShaderProgram::cacheUniformLocations() noexcept {
                     uniform_name.get(),
                     static_cast<std::size_t>(length) });
             mUniformLocations[hash] = location;
-            mUniformNames[hash] = std::string{ uniform_name.get() };
+#ifdef DEBUG_BUILD
             spdlog::info("uniform location for \"{}\" (hash: {:X}): {}", uniform_name.get(), hash, location);
+#endif
         }
     }
 }
