@@ -28,14 +28,20 @@ public:
     static void unbind(GLint textureUnit) noexcept;
     void setFiltering(Filtering filtering) const noexcept;
     void setWrap(bool enabled) const noexcept;
+    int getWidth() const noexcept;
+    int getHeight() const noexcept;
+    int getNumChannels() const noexcept;
 
     [[nodiscard]] static tl::expected<Texture, std::string> Create(const Image& image) noexcept;
-
-private:
-    static GLint getTextureUnitCount() noexcept;
+    [[nodiscard]] static GLint getTextureUnitCount() noexcept;
 
 private:
     static inline GLint sTextureUnitCount{ 0U };
+    int mWidth{ 0U };
+
+private:
+    int mHeight{ 0U };
+    int mNumChannels{ 0U };
     GLuint mName{ 0U };
 };
 

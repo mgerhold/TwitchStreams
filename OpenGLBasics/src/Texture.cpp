@@ -25,9 +25,11 @@ tl::expected<Texture, std::string> Texture::Create(const Image &image) noexcept 
     glTexImage2D(GL_TEXTURE_2D, 0, colorComponentFormat, image.getWidth(), image.getHeight(), 0,
                  colorComponentFormat, GL_UNSIGNED_BYTE, image.getData());
     glGenerateMipmap(GL_TEXTURE_2D);
+    result.mWidth = image.getWidth();
+    result.mHeight = image.getHeight();
+    result.mNumChannels = image.getNumChannels();
     result.setFiltering(Filtering::Linear);
     result.setWrap(false);
-    spdlog::info("Created texture from image ({}x{})", image.getWidth(), image.getHeight());
     return result;
 }
 
@@ -74,6 +76,9 @@ void Texture::setWrap(bool enabled) const noexcept {
 Texture::Texture(Texture &&other) noexcept {
     using std::swap;
     swap(mName, other.mName);
+    swap(mWidth, other.mWidth);
+    swap(mHeight, other.mHeight);
+    swap(mNumChannels, other.mNumChannels);
 }
 
 Texture::~Texture() {
@@ -83,5 +88,20 @@ Texture::~Texture() {
 Texture &Texture::operator=(Texture &&other) noexcept {
     using std::swap;
     swap(mName, other.mName);
+    swap(mWidth, other.mWidth);
+    swap(mHeight, other.mHeight);
+    swap(mNumChannels, other.mNumChannels);
     return *this;
+}
+
+int Texture::getWidth() const noexcept {
+    return mWidth;
+}
+
+int Texture::getHeight() const noexcept {
+    return mHeight;
+}
+
+int Texture::getNumChannels() const noexcept {
+    return mNumChannels;
 }

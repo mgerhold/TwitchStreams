@@ -22,8 +22,8 @@ void Sandbox::setup() noexcept {
                     and_then(Texture::Create);
 
     if (expectedTexture) {
-        spdlog::info("Texture loaded");
         mTexture = std::move(expectedTexture.value());
+        spdlog::info("Texture loaded (size {}x{})", mTexture.getWidth(), mTexture.getHeight());
     } else {
         spdlog::error("Failed to load texture: {}", expectedTexture.error());
     }

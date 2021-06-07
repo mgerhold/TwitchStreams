@@ -9,7 +9,6 @@
 #include <memory>
 #include <filesystem>
 #include <string>
-#include <spdlog/spdlog.h>
 
 class Image final {
 public:

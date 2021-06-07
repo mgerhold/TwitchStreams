@@ -25,7 +25,6 @@ tl::expected<Image, std::string> Image::LoadFromFile(const std::filesystem::path
     if (numChannels != 0) {
         result.mNumChannels = numChannels;
     }
-    spdlog::info("Loaded image {} (size {}x{})", filename.string(), result.mWidth, result.mHeight);
     return result;
 }
 
@@ -64,5 +63,4 @@ Image &Image::operator=(Image &&other) noexcept {
 
 void Image::Deleter::operator()(unsigned char *const data) {
     stbi_image_free(data);
-    spdlog::info("Image has been freed");
 }
