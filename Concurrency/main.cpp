@@ -16,11 +16,16 @@ std::string getCurrentThreadID() {
 }
 
 void sumPart(const auto begin, const auto end, auto& accumulator) {
-    auto tempAccumulator = accumulator;
+    auto tempAccumulator = accumulator; // local variable to prevent false sharing
     for (auto it = begin; it != end; ++it) {
         tempAccumulator += *it;
     }
     accumulator = tempAccumulator;
+
+    // alternative code without local variable (shows significantly worse timing behavior):
+    /*for (auto it = begin; it != end; ++it) {
+        accumulator += *it;
+    }*/
 }
 
 [[nodiscard]] auto sum(const auto begin, const auto end, const unsigned int forceNumThreads = 0U) {
@@ -28,12 +33,12 @@ void sumPart(const auto begin, const auto end, auto& accumulator) {
     const size_t numElements = std::distance(begin, end);
 
     constexpr unsigned int minNumElementsPerThread = 32U;
-    const unsigned int desiredMinNumThreads = std::max(static_cast<std::size_t>(1),
-                                                       numElements / minNumElementsPerThread);
+    const unsigned int desiredMinNumThreads = std::max(
+            1U,
+            static_cast<unsigned int>(numElements) / minNumElementsPerThread);
     const unsigned int numHardwareThreads = std::max(std::thread::hardware_concurrency(), 1U);
     const unsigned int numThreads = forceNumThreads == 0U ? std::min(desiredMinNumThreads, numHardwareThreads)
             : forceNumThreads;
-    //std::cout << std::format("Starting {} worker threads...\n", numThreads);
 
     const size_t numElementsPerThread = numElements / numThreads;
     std::vector<std::jthread> workerThreads;
@@ -44,16 +49,16 @@ void sumPart(const auto begin, const auto end, auto& accumulator) {
         std::advance(rangeBegin, numElementsPerThread);
         const auto rangeEnd = rangeBegin;
         workerThreads.emplace_back(sumPart<decltype(previousRangeBegin), decltype(rangeEnd), ValueType>,
-                previousRangeBegin, rangeEnd, std::ref(partialSums.at(i)));
+                previousRangeBegin, rangeEnd, std::ref(partialSums.at(i))); // "stf::ref" because jthread's c'tor
+                                                                               // takes arguments by value and copies
+                                                                               // them (just like std::bind)
     }
     sumPart<decltype(rangeBegin), decltype(end), ValueType>(rangeBegin, end, partialSums.back());
     for (auto& thread : workerThreads) {
         thread.join();
     }
     ValueType result{};
-    for (const auto& partialSum : partialSums) {
-        result += partialSum;
-    }
+    sumPart(partialSums.cbegin(), partialSums.cend(), result);
     return result;
 }
 
@@ -62,16 +67,16 @@ int main() {
     using ValueType = int;
     constexpr std::size_t numberOfInts = static_cast<std::size_t>(std::numeric_limits<int>::max());
     std::vector<ValueType> intsVector(numberOfInts);
-    std::cout << "Vector created..." << std::endl;
+    std::cout << "Vector created...\n";
     std::fill(intsVector.begin(), intsVector.end(), 1);
+    std::cout << "Vector filled...\n";
 
-    for (unsigned int numThreads = 1U; numThreads <= 24U; ++numThreads) {
+    for (unsigned int numThreads = 1U; numThreads <= 48U; ++numThreads) {
         const auto start = std::chrono::high_resolution_clock::now();
-        const auto sumOfInts = sum(intsVector.cbegin(), intsVector.cend(), numThreads);
+        [[maybe_unused]] const auto sumOfInts = sum(intsVector.cbegin(), intsVector.cend(), numThreads);
         const auto end = std::chrono::high_resolution_clock::now();
         const auto duration = std::chrono::duration<double>(end - start).count();
         std::cout << std::format("{} threads: {} s\n", numThreads, duration);
         assert(sumOfInts == numberOfInts);
     }
-    //std::cout << sumOfInts << '\n';
 }
