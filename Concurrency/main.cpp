@@ -2,12 +2,11 @@
 #include <thread>
 #include <chrono>
 #include <format>
-#include <sstream>
 #include <vector>
-#include <algorithm>
 #include <cassert>
 #include <limits>
 #include <cstdint>
+#include <cmath>
 
 std::string getCurrentThreadID() {
     std::stringstream ss;
@@ -15,10 +14,11 @@ std::string getCurrentThreadID() {
     return ss.str();
 }
 
-void sumPart(const auto begin, const auto end, auto& accumulator) {
-    auto tempAccumulator = accumulator; // local variable to prevent false sharing
+void sumPart(const auto begin, const auto end, auto &accumulator) {
+    auto tempAccumulator = accumulator;// local variable to prevent false sharing
     for (auto it = begin; it != end; ++it) {
-        tempAccumulator += *it;
+        tempAccumulator += static_cast<int>(std::cos(std::sqrt(*it) - 1.0));// additional computation to enhance
+                                                                            // the observed effect
     }
     accumulator = tempAccumulator;
 
@@ -33,12 +33,11 @@ void sumPart(const auto begin, const auto end, auto& accumulator) {
     const size_t numElements = std::distance(begin, end);
 
     constexpr unsigned int minNumElementsPerThread = 32U;
-    const unsigned int desiredMinNumThreads = std::max(
-            1U,
-            static_cast<unsigned int>(numElements) / minNumElementsPerThread);
+    const unsigned int desiredMinNumThreads =
+            std::max(1U, static_cast<unsigned int>(numElements) / minNumElementsPerThread);
     const unsigned int numHardwareThreads = std::max(std::thread::hardware_concurrency(), 1U);
-    const unsigned int numThreads = forceNumThreads == 0U ? std::min(desiredMinNumThreads, numHardwareThreads)
-            : forceNumThreads;
+    const unsigned int numThreads =
+            forceNumThreads == 0U ? std::min(desiredMinNumThreads, numHardwareThreads) : forceNumThreads;
 
     const size_t numElementsPerThread = numElements / numThreads;
     std::vector<std::jthread> workerThreads;
@@ -49,12 +48,13 @@ void sumPart(const auto begin, const auto end, auto& accumulator) {
         std::advance(rangeBegin, numElementsPerThread);
         const auto rangeEnd = rangeBegin;
         workerThreads.emplace_back(sumPart<decltype(previousRangeBegin), decltype(rangeEnd), ValueType>,
-                previousRangeBegin, rangeEnd, std::ref(partialSums.at(i))); // "stf::ref" because jthread's c'tor
-                                                                               // takes arguments by value and copies
-                                                                               // them (just like std::bind)
+                                   previousRangeBegin, rangeEnd,
+                                   std::ref(partialSums.at(i)));// "stf::ref" because jthread's c'tor
+                                                                // takes arguments by value and copies
+                                                                // them (just like std::bind)
     }
     sumPart<decltype(rangeBegin), decltype(end), ValueType>(rangeBegin, end, partialSums.back());
-    for (auto& thread : workerThreads) {
+    for (auto &thread : workerThreads) {
         thread.join();
     }
     ValueType result{};
@@ -66,6 +66,7 @@ void sumPart(const auto begin, const auto end, auto& accumulator) {
 int main() {
     using ValueType = int;
     constexpr std::size_t numberOfInts = static_cast<std::size_t>(std::numeric_limits<int>::max());
+    std::cout << "Creating vector...\n";
     std::vector<ValueType> intsVector(numberOfInts);
     std::cout << "Vector created...\n";
     std::fill(intsVector.begin(), intsVector.end(), 1);
