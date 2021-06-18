@@ -43,6 +43,7 @@ void sumPart(const auto begin, const auto end, std::mutex &accumulatorMutex, aut
 
     const size_t numElementsPerThread = numElements / numThreads;
     std::vector<std::jthread> workerThreads;
+    workerThreads.reserve(numThreads - 1U);
     ValueType result{};
     std::mutex resultMutex;
     auto rangeBegin = begin;
