@@ -38,9 +38,9 @@ void doSomething() {
 
 int main() {
     constexpr std::size_t numberOfThreads = 5;
-    std::vector<std::jthread> threads; // jthreads join automatically at the end of the scope
+    std::vector<std::jthread> threads;// jthreads join automatically at the end of the scope
     threads.reserve(numberOfThreads);
-    for (std::size_t  i = 0; i < numberOfThreads; ++i) {
+    for (std::size_t i = 0; i < numberOfThreads; ++i) {
         threads.emplace_back(doSomething);
     }
 }

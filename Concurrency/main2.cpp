@@ -19,8 +19,8 @@ double f(const double x) {
 void integrateInterval(const double intervalStart,
                        const double intervalEnd,
                        const uint64_t numberOfStripes,
-                       double &refAccumulator,
-                       std::mutex &accumulatorMutex) {
+                       double& refAccumulator,
+                       std::mutex& accumulatorMutex) {
     assert(intervalEnd > intervalStart);
     const double stripeWidth = (intervalEnd - intervalStart) / static_cast<double>(numberOfStripes);
     double result = 0.0;
@@ -58,7 +58,7 @@ double integrate(const double intervalStart,
     }
     integrateInterval(intervalStart + static_cast<double>(numberOfThreads - 1ULL) * subIntervalWidth, intervalEnd,
                       numberOfStripesPerThread, result, resultMutex);
-    for (auto &thread : workerThreads) {
+    for (auto& thread : workerThreads) {
         thread.join();
     }
     return result;

@@ -15,7 +15,7 @@ std::string getCurrentThreadID() {
     return ss.str();
 }
 
-void sumPart(const auto begin, const auto end, std::mutex &accumulatorMutex, auto &accumulator) {
+void sumPart(const auto begin, const auto end, std::mutex& accumulatorMutex, auto& accumulator) {
     std::remove_reference_t<decltype(accumulator)> tempAccumulator{};// local variable to prevent false sharing
     for (auto it = begin; it != end; ++it) {
         tempAccumulator += static_cast<int>(std::cos(std::sqrt(*it) - 1.0));// additional computation to enhance
@@ -58,7 +58,7 @@ void sumPart(const auto begin, const auto end, std::mutex &accumulatorMutex, aut
                                                      // them (just like std::bind)
     }
     sumPart<decltype(rangeBegin), decltype(end), ValueType>(rangeBegin, end, resultMutex, result);
-    for (auto &thread : workerThreads) {
+    for (auto& thread : workerThreads) {
         thread.join();
     }
     return result;
