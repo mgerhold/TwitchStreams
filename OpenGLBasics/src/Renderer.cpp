@@ -25,7 +25,6 @@ void Renderer::endScene() noexcept {
     }
     mVertexBuffer.submitVertexData(mVertexData, GLDataUsagePattern::DynamicDraw);
     mVertexBuffer.submitIndexData(mIndexData, GLDataUsagePattern::DynamicDraw);
-    spdlog::info("Drawing {} indices", mVertexBuffer.indicesCount());
     mVertexBuffer.bind();
     glDrawElements(GL_TRIANGLES, gsl::narrow_cast<GLsizei>(mVertexBuffer.indicesCount()), GL_UNSIGNED_INT, nullptr);
 }

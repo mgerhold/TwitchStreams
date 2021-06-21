@@ -53,7 +53,6 @@ public:
         // TODO: handle the possibility of varying data type for OpenGL indices
         static_assert(sizeof(IndexData::i0) == 4);
         mNumIndices = data.size() * sizeof(decltype(data)::value_type) / sizeof(IndexData::i0);
-        spdlog::info("submitted {} indices", mNumIndices);
     }
 
     template<typename IndexData>
