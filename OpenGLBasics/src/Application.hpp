@@ -23,19 +23,28 @@ public:
     Application& operator=(Application&&) = delete;
 
     void run() noexcept;
-    [[nodiscard]] bool hasError() const { return mError; };
+    [[nodiscard]] bool hasError() const {
+        return mError;
+    };
     [[nodiscard]] WindowSize getFramebufferSize() const;
 
 protected:
-    [[nodiscard]] inline GLFWwindow * getGLFWWindowPointer() const noexcept { return mWindowPtr; }
+    [[nodiscard]] inline GLFWwindow* getGLFWWindowPointer() const noexcept {
+        return mWindowPtr;
+    }
 
 private:
-    static void handleOpenGLDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity,
-                                        GLsizei /* length */, const char *message, const void* /* userParam */);
+    static void handleOpenGLDebugOutput(GLenum source,
+                                        GLenum type,
+                                        unsigned int id,
+                                        GLenum severity,
+                                        GLsizei /* length */,
+                                        const char* message,
+                                        const void* /* userParam */);
 
 private:
     GLFWwindow* mWindowPtr;
-    bool mError{false };
+    bool mError{ false };
 };
 
 #include "Application.inc"

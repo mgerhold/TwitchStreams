@@ -38,11 +38,7 @@ public:
 private:
     static inline GLint sTextureUnitCount{ 0U };
     int mWidth{ 0U };
-
-private:
     int mHeight{ 0U };
     int mNumChannels{ 0U };
     GLuint mName{ 0U };
 };
-
-

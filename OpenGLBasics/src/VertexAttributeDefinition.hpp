@@ -8,9 +8,11 @@
 
 struct VertexAttributeDefinition {
     VertexAttributeDefinition(GLint count, GLenum type, GLboolean normalized) noexcept
-        : count(count), type(type), normalized(normalized) {}
+        : count(count),
+          type(type),
+          normalized(normalized) { }
 
-    GLint count; // e.g. 3 for a vec3 position vector
-    GLenum type; // e.g. GL_FLOAT
+    GLint count;// e.g. 3 for a vec3 position vector
+    GLenum type;// e.g. GL_FLOAT
     GLboolean normalized;
 };

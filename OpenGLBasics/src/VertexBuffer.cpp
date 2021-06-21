@@ -10,7 +10,7 @@ VertexBuffer::VertexBuffer() noexcept {
     glGenBuffers(1U, &mElementBufferObjectName);
 }
 
-VertexBuffer::VertexBuffer(VertexBuffer &&other) noexcept {
+VertexBuffer::VertexBuffer(VertexBuffer&& other) noexcept {
     using std::swap;
     swap(mVertexArrayObjectName, other.mVertexArrayObjectName);
     swap(mVertexBufferObjectName, other.mVertexBufferObjectName);
@@ -24,7 +24,7 @@ VertexBuffer::~VertexBuffer() {
     glDeleteBuffers(1U, &mElementBufferObjectName);
 }
 
-VertexBuffer &VertexBuffer::operator=(VertexBuffer &&other) noexcept {
+VertexBuffer& VertexBuffer::operator=(VertexBuffer&& other) noexcept {
     using std::swap;
     swap(mVertexArrayObjectName, other.mVertexArrayObjectName);
     swap(mVertexBufferObjectName, other.mVertexBufferObjectName);
@@ -59,13 +59,6 @@ void VertexBuffer::bindVertexBufferObject() const noexcept {
     }
 }
 
-void VertexBuffer::submitVertexData(const std::vector<GLfloat> &vertices,
-                                    GLDataUsagePattern dataUsagePattern) const noexcept {
-    bindVertexArrayObject();
-    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * vertices.size(), vertices.data(),
-                 static_cast<GLenum>(dataUsagePattern));
-}
-
 void VertexBuffer::bindElementBufferObject() const noexcept {
     if (sCurrentlyBoundElementBufferObjectName != mElementBufferObjectName) {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mElementBufferObjectName);
@@ -92,12 +85,4 @@ void VertexBuffer::unbindElementBufferObject() noexcept {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0U);
         sCurrentlyBoundElementBufferObjectName = 0U;
     }
-}
-
-void VertexBuffer::submitIndexData(const std::vector<GLuint> &indices,
-                                   GLDataUsagePattern dataUsagePattern) noexcept {
-    bindElementBufferObject();
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, gsl::narrow_cast<GLsizeiptr>(sizeof(GLuint) * indices.size()),
-                 indices.data(), static_cast<GLenum>(dataUsagePattern));
-    mNumIndices = indices.size();
 }

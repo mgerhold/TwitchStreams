@@ -5,7 +5,7 @@
 #include "Texture.hpp"
 #include <spdlog/spdlog.h>
 
-tl::expected<Texture, std::string> Texture::Create(const Image &image) noexcept {
+tl::expected<Texture, std::string> Texture::Create(const Image& image) noexcept {
     GLint colorComponentFormat;
     const int numChannels = image.getNumChannels();
     switch (numChannels) {
@@ -22,8 +22,8 @@ tl::expected<Texture, std::string> Texture::Create(const Image &image) noexcept 
     Texture result;
     glGenTextures(1, &result.mName);
     result.bind();
-    glTexImage2D(GL_TEXTURE_2D, 0, colorComponentFormat, image.getWidth(), image.getHeight(), 0,
-                 colorComponentFormat, GL_UNSIGNED_BYTE, image.getData());
+    glTexImage2D(GL_TEXTURE_2D, 0, colorComponentFormat, image.getWidth(), image.getHeight(), 0, colorComponentFormat,
+                 GL_UNSIGNED_BYTE, image.getData());
     glGenerateMipmap(GL_TEXTURE_2D);
     result.mWidth = image.getWidth();
     result.mHeight = image.getHeight();
@@ -55,7 +55,7 @@ GLint Texture::getTextureUnitCount() noexcept {
     if (sTextureUnitCount != 0) {
         return sTextureUnitCount;
     }
-    glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &sTextureUnitCount);
+    glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &sTextureUnitCount);
     return sTextureUnitCount;
 }
 
@@ -73,7 +73,7 @@ void Texture::setWrap(bool enabled) const noexcept {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, enabled ? GL_REPEAT : GL_CLAMP_TO_EDGE);
 }
 
-Texture::Texture(Texture &&other) noexcept {
+Texture::Texture(Texture&& other) noexcept {
     using std::swap;
     swap(mName, other.mName);
     swap(mWidth, other.mWidth);
@@ -85,7 +85,7 @@ Texture::~Texture() {
     glDeleteTextures(1, &mName);
 }
 
-Texture &Texture::operator=(Texture &&other) noexcept {
+Texture& Texture::operator=(Texture&& other) noexcept {
     using std::swap;
     swap(mName, other.mName);
     swap(mWidth, other.mWidth);

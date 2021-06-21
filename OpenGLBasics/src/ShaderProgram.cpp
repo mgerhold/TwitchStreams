@@ -13,13 +13,13 @@
 
 GLuint ShaderProgram::sCurrentlyBoundName{ 0U };
 
-ShaderProgram::ShaderProgram(ShaderProgram &&other) noexcept {
+ShaderProgram::ShaderProgram(ShaderProgram&& other) noexcept {
     using std::swap;
     swap(mName, other.mName);
     swap(mUniformLocations, other.mUniformLocations);
 }
 
-ShaderProgram &ShaderProgram::operator=(ShaderProgram &&other) noexcept {
+ShaderProgram& ShaderProgram::operator=(ShaderProgram&& other) noexcept {
     using std::swap;
     swap(mName, other.mName);
     swap(mUniformLocations, other.mUniformLocations);
@@ -96,23 +96,22 @@ void ShaderProgram::unbind() noexcept {
     sCurrentlyBoundName = 0U;
 }
 
-tl::expected<ShaderProgram, std::string> ShaderProgram::generateFromFiles(const std::filesystem::path &vertexShaderPath,
-                                                                          const std::filesystem::path &fragmentShaderPath) {
+tl::expected<ShaderProgram, std::string> ShaderProgram::generateFromFiles(
+        const std::filesystem::path& vertexShaderPath,
+        const std::filesystem::path& fragmentShaderPath) {
     using namespace std::literals::string_literals;
     if (!exists(vertexShaderPath)) {
         return tl::unexpected{ fmt::format("Vertex shader source file not found (filename was {}).",
-                    vertexShaderPath.string()) };
+                                           vertexShaderPath.string()) };
     }
     if (!exists(fragmentShaderPath)) {
         return tl::unexpected{ fmt::format("Fragment shader source file not found (filename was {}).",
-                                          fragmentShaderPath.string()) };
+                                           fragmentShaderPath.string()) };
     }
     const auto readStringFromFile = [](const std::filesystem::path& path) {
         std::ifstream vertexShaderFileStream{ path };
-        return std::string{
-                std::istreambuf_iterator<char>{vertexShaderFileStream},
-                std::istreambuf_iterator<char>{}
-        };
+        return std::string{ std::istreambuf_iterator<char>{ vertexShaderFileStream },
+                            std::istreambuf_iterator<char>{} };
     };
     std::string vertexShaderSource = readStringFromFile(vertexShaderPath);
     std::string fragmentShaderSource = readStringFromFile(fragmentShaderPath);
@@ -124,13 +123,14 @@ tl::expected<ShaderProgram, std::string> ShaderProgram::generateFromFiles(const 
     return shaderProgram;
 }
 
-void ShaderProgram::setUniform(std::size_t uniformNameHash, const glm::mat4 &matrix) const noexcept {
+void ShaderProgram::setUniform(std::size_t uniformNameHash, const glm::mat4& matrix) const noexcept {
     bind();
     const auto it = mUniformLocations.find(uniformNameHash);
 
     if (it == mUniformLocations.cend()) {
 #ifdef DEBUG_BUILD
-        spdlog::error("Could not set uniform \"{}\" since it could not be found.", Hash::getStringFromHash(uniformNameHash));
+        spdlog::error("Could not set uniform \"{}\" since it could not be found.",
+                      Hash::getStringFromHash(uniformNameHash));
 #else
         spdlog::error("Could not set uniform because the hash value {} could not be found.", uniformNameHash);
 #endif
@@ -143,25 +143,22 @@ void ShaderProgram::cacheUniformLocations() noexcept {
     GLint uniform_count = 0;
     glGetProgramiv(this->mName, GL_ACTIVE_UNIFORMS, &uniform_count);
 
-    if (uniform_count != 0)
-    {
-        GLint 	max_name_len = 0;
+    if (uniform_count != 0) {
+        GLint max_name_len = 0;
         GLsizei length = 0;
         GLsizei count = 0;
-        GLenum 	type = GL_NONE;
+        GLenum type = GL_NONE;
         glGetProgramiv(this->mName, GL_ACTIVE_UNIFORM_MAX_LENGTH, &max_name_len);
 
         auto uniform_name = std::make_unique<char[]>(max_name_len);
 
-        for (GLint i = 0; i < uniform_count; ++i)
-        {
+        for (GLint i = 0; i < uniform_count; ++i) {
             glGetActiveUniform(this->mName, i, max_name_len, &length, &count, &type, uniform_name.get());
 
             GLint location = glGetUniformLocation(this->mName, uniform_name.get());
 
-            const std::size_t hash = Hash::hashString(std::string_view{
-                    uniform_name.get(),
-                    static_cast<std::size_t>(length) });
+            const std::size_t hash =
+                    Hash::hashString(std::string_view{ uniform_name.get(), static_cast<std::size_t>(length) });
             mUniformLocations[hash] = location;
 #ifdef DEBUG_BUILD
             spdlog::info("uniform location for \"{}\" (hash: {:X}): {}", uniform_name.get(), hash, location);

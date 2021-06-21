@@ -12,5 +12,3 @@ namespace GLUtils {
     std::size_t getSizeOfGLType(GLenum dataType);
 
 }
-
-

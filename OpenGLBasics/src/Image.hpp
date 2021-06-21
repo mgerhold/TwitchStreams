@@ -24,7 +24,7 @@ public:
     [[nodiscard]] int getWidth() const noexcept;
     [[nodiscard]] int getHeight() const noexcept;
     [[nodiscard]] int getNumChannels() const noexcept;
-    [[nodiscard]] unsigned char *getData() const noexcept;
+    [[nodiscard]] unsigned char* getData() const noexcept;
 
 private:
     struct Deleter {
@@ -41,5 +41,3 @@ private:
     int mNumChannels{ 0 };
     Pointer mData{ nullptr };
 };
-
-

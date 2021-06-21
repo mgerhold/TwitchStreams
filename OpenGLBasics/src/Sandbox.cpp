@@ -17,9 +17,9 @@ void Sandbox::setup() noexcept {
     spdlog::info("This is the release build");
 #endif
     spdlog::info("Current path is {}", std::filesystem::current_path().string());
-    auto expectedTexture = Image::LoadFromFile(
-                std::filesystem::current_path() / "assets" / "images" / "nojava.png").
-                    and_then(Texture::Create);
+    spdlog::info("Number of supported texture units: {}", Texture::getTextureUnitCount());
+    auto expectedTexture = Image::LoadFromFile(std::filesystem::current_path() / "assets" / "images" / "nojava.png")
+                                   .and_then(Texture::Create);
 
     if (expectedTexture) {
         mTexture = std::move(expectedTexture.value());
@@ -35,23 +35,22 @@ void Sandbox::setup() noexcept {
     const glm::vec4 v2{ 100.0f, 100.0f, 0.0f, 1.0f };
     const glm::vec4 v3{ -100.0f, 100.0f, 0.0f, 1.0f };
 
-    const std::vector<GLfloat> vertices {
-            // position        // color             // UVs
-            v0.x, v0.y,        1.0f, 0.0f, 0.0f,    0.0f, 0.0f,     // bottom left
-            v1.x, v1.y,        0.0f, 1.0f, 0.0f,    1.0f, 0.0f,     // bottom right
-            v2.x, v2.y,        0.0f, 0.0f, 1.0f,    1.0f, 1.0f,     // top right
-            v3.x, v3.y,        1.0f, 0.5f, 0.0f,    0.0f, 1.0f      // top left
+    const std::vector<GLfloat> vertices{
+        // position        // color             // UVs
+        v0.x, v0.y, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,// bottom left
+        v1.x, v1.y, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,// bottom right
+        v2.x, v2.y, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,// top right
+        v3.x, v3.y, 1.0f, 0.5f, 0.0f, 0.0f, 1.0f // top left
     };
-    const std::vector<GLuint> indices {
-            0, 1, 2,
-            2, 3, 0,
+    const std::vector<GLuint> indices{
+        0, 1, 2, 2, 3, 0,
     };
-    mVertexBuffer.bind();
-    mVertexBuffer.setVertexAttributeLayout(VertexAttributeDefinition{2, GL_FLOAT, false},
-                                           VertexAttributeDefinition{3, GL_FLOAT, false},
-                                           VertexAttributeDefinition{2, GL_FLOAT, false});
-    mVertexBuffer.submitVertexData(vertices, GLDataUsagePattern::StaticDraw);
-    mVertexBuffer.submitIndexData(indices, GLDataUsagePattern::StaticDraw);
+    /*mVertexBuffer.bind();
+    mVertexBuffer.setVertexAttributeLayout(VertexAttributeDefinition{ 2, GL_FLOAT, false },
+                                           VertexAttributeDefinition{ 3, GL_FLOAT, false },
+                                           VertexAttributeDefinition{ 2, GL_FLOAT, false });*/
+    //mVertexBuffer.submitVertexData(vertices, GLDataUsagePattern::StaticDraw);
+    //mVertexBuffer.submitIndexData(indices, GLDataUsagePattern::StaticDraw);
     mShaderProgram.bind();
     glClearColor(73.f / 255.f, 54.f / 255.f, 87.f / 255.f, 1.f);
 }
@@ -69,20 +68,34 @@ void Sandbox::processInput() noexcept {
 
 void Sandbox::render() noexcept {
     const auto framebufferSize = getFramebufferSize();
-    const auto projectionMatrix = glm::ortho<float>(gsl::narrow_cast<float>(-framebufferSize.width / 2),
-                                                    gsl::narrow_cast<float>(framebufferSize.width / 2),
-                                                    gsl::narrow_cast<float>(-framebufferSize.height / 2),
-                                                    gsl::narrow_cast<float>(framebufferSize.height / 2));
+    const auto projectionMatrix = glm::ortho<float>(
+            gsl::narrow_cast<float>(-framebufferSize.width / 2), gsl::narrow_cast<float>(framebufferSize.width / 2),
+            gsl::narrow_cast<float>(-framebufferSize.height / 2), gsl::narrow_cast<float>(framebufferSize.height / 2));
     mShaderProgram.setUniform(Hash::staticHashString("projectionMatrix"), projectionMatrix);
+
+    /*sRenderer::beginScene();
+    sRenderer::drawQuad(modelMatrix, mShaderProgram, mTexture);
+    sRenderer::drawQuad(modelMatrix, mShaderProgram, mTexture);
+    sRenderer::drawQuad(modelMatrix, mShaderProgram, mTexture);
+    sRenderer::drawQuad(modelMatrix, mShaderProgram, mTexture);
+    sRenderer::drawQuad(modelMatrix, mShaderProgram, mTexture);
+    sRenderer::drawQuad(modelMatrix, mShaderProgram, mTexture);
+    sRenderer::endScene();*/
+
     glClear(GL_COLOR_BUFFER_BIT);
-    glDrawElements(GL_TRIANGLES, gsl::narrow_cast<GLsizei>(mVertexBuffer.indicesCount()),
-            GL_UNSIGNED_INT, nullptr);
+    mRenderer.beginScene();
+    mRenderer.drawQuad(glm::mat4{ 100.0f }, mShaderProgram, mTexture);
+    auto identityScaled = glm::scale(glm::mat4{ 1.0f }, glm::vec3{ 100.0f });
+    identityScaled = glm::translate(identityScaled, glm::vec3{ 1.0f, 1.0f, 0.0f });
+    mRenderer.drawQuad(identityScaled, mShaderProgram, mTexture);
+    mRenderer.endScene();
+    //glDrawElements(GL_TRIANGLES, gsl::narrow_cast<GLsizei>(mVertexBuffer.indicesCount()), GL_UNSIGNED_INT, nullptr);
 }
 
 void Sandbox::setupShaders() noexcept {
-    auto expectedShaderProgram = ShaderProgram::generateFromFiles(
-            std::filesystem::current_path() / "assets" / "shaders" / "default.vert",
-            std::filesystem::current_path() / "assets" / "shaders" / "default.frag");
+    auto expectedShaderProgram =
+            ShaderProgram::generateFromFiles(std::filesystem::current_path() / "assets" / "shaders" / "default.vert",
+                                             std::filesystem::current_path() / "assets" / "shaders" / "default.frag");
     if (!expectedShaderProgram) {
         spdlog::error("Failed to generate shader program from files: {}", expectedShaderProgram.error());
         return;
