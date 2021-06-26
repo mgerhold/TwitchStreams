@@ -3,11 +3,25 @@ project(Concurrency)
 
 set(CMAKE_CXX_STANDARD 20)
 
+set(TARGET_LIST
+        Concurrency
+        Concurrency2
+        Concurrency3
+        Concurrency4
+        Concurrency5
+        Concurrency6
+        Concurrency7
+        Concurrency8
+        )
+
 add_executable(Concurrency main.cpp)
 add_executable(Concurrency2 main2.cpp)
 add_executable(Concurrency3 main3.cpp)
 add_executable(Concurrency4 main4.cpp)
 add_executable(Concurrency5 main5.cpp)
+add_executable(Concurrency6 main6.cpp)
+add_executable(Concurrency7 main7.cpp)
+add_executable(Concurrency8 main8.cpp)
 
 if (MSVC)
     # remove /W3 from defaults and set warning level per target later on
@@ -17,15 +31,11 @@ endif()
 
 # set warning levels
 if (MSVC)
-    target_compile_options(Concurrency PUBLIC /W4 /permissive)
-    target_compile_options(Concurrency2 PUBLIC /W4 /permissive)
-    target_compile_options(Concurrency3 PUBLIC /W4 /permissive)
-    target_compile_options(Concurrency4 PUBLIC /W4 /permissive)
-    target_compile_options(Concurrency5 PUBLIC /W4 /permissive)
+    foreach(target ${TARGET_LIST})
+        target_compile_options(${target} PUBLIC /W4 /permissive)
+    endforeach()
 else()
-    target_compile_options(Concurrency PUBLIC -Wall -Wextra -pedantic)
-    target_compile_options(Concurrency2 PUBLIC -Wall -Wextra -pedantic)
-    target_compile_options(Concurrency3 PUBLIC -Wall -Wextra -pedantic)
-    target_compile_options(Concurrency4 PUBLIC -Wall -Wextra -pedantic)
-    target_compile_options(Concurrency5 PUBLIC -Wall -Wextra -pedantic)
+    foreach(target ${TARGET_LIST})
+        target_compile_options(${target} PUBLIC -Wall -Wextra -pedantic)
+    endforeach()
 endif()
