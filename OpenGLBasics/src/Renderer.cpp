@@ -8,28 +8,27 @@
 #include <spdlog/spdlog.h>
 
 Renderer::Renderer() {
-    mVertexData.reserve(maxVerticesPerBatch);
+    mVertexData.reserve(maxTrianglesPerBatch * 3ULL);
+    mIndexData.reserve(maxTrianglesPerBatch * 3ULL);
     mVertexBuffer.setVertexAttributeLayout(VertexAttributeDefinition{ 3, GL_FLOAT, false },
                                            VertexAttributeDefinition{ 4, GL_FLOAT, false },
                                            VertexAttributeDefinition{ 2, GL_FLOAT, false });
 }
 
-void Renderer::beginScene() noexcept {
+void Renderer::beginFrame() noexcept {
     mVertexData.clear();
     mIndexData.clear();
+    mRenderStats = RenderStats{};
 }
 
-void Renderer::endScene() noexcept {
-    if (mVertexData.empty()) {
-        return;
-    }
-    mVertexBuffer.submitVertexData(mVertexData, GLDataUsagePattern::DynamicDraw);
-    mVertexBuffer.submitIndexData(mIndexData, GLDataUsagePattern::DynamicDraw);
-    mVertexBuffer.bind();
-    glDrawElements(GL_TRIANGLES, gsl::narrow_cast<GLsizei>(mVertexBuffer.indicesCount()), GL_UNSIGNED_INT, nullptr);
+void Renderer::endFrame() noexcept {
+    flush();
 }
 
 void Renderer::drawQuad(const glm::mat4& transform, const ShaderProgram& shader, const Texture& texture) noexcept {
+    if (mNumTrianglesInCurrentBatch + 2ULL > maxTrianglesPerBatch) {
+        flush();
+    }
     const auto indexOffset = mVertexData.size();
     mVertexData.push_back(VertexData{ .position = glm::vec3{ transform * glm::vec4{ -1.0f, -1.0f, 0.0f, 1.0f } },
                                       .color = glm::vec4{ 1.0f, 1.0f, 1.0f, 1.0f },
@@ -49,4 +48,24 @@ void Renderer::drawQuad(const glm::mat4& transform, const ShaderProgram& shader,
     mIndexData.push_back(IndexData{ .i0 = gsl::narrow_cast<GLuint>(indexOffset + 0),
                                     .i1 = gsl::narrow_cast<GLuint>(indexOffset + 2),
                                     .i2 = gsl::narrow_cast<GLuint>(indexOffset + 3) });
+    mNumTrianglesInCurrentBatch += 2ULL;
+    mRenderStats.numVertices += 4ULL;
+    mRenderStats.numTriangles += 2ULL;
+}
+
+void Renderer::flush() noexcept {
+    if (mVertexData.empty()) {
+        return;
+    }
+    mVertexBuffer.submitVertexData(mVertexData, GLDataUsagePattern::DynamicDraw);
+    mVertexBuffer.submitIndexData(mIndexData, GLDataUsagePattern::DynamicDraw);
+    mVertexBuffer.bind();
+    if (mRenderStats.numBatches == 0ULL) {
+        glClear(GL_COLOR_BUFFER_BIT);
+    }
+    glDrawElements(GL_TRIANGLES, gsl::narrow_cast<GLsizei>(mVertexBuffer.indicesCount()), GL_UNSIGNED_INT, nullptr);
+    mVertexData.clear();
+    mIndexData.clear();
+    mNumTrianglesInCurrentBatch = 0ULL;
+    mRenderStats.numBatches += 1ULL;
 }

@@ -36,7 +36,7 @@ public:
     template<typename VertexData>
     void submitVertexData(std::span<VertexData> data, GLDataUsagePattern dataUsagePattern) noexcept {
         bindVertexArrayObject();
-        glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(decltype(data)::value_type), data.data(),
+        glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(typename decltype(data)::value_type), data.data(),
                      static_cast<GLenum>(dataUsagePattern));
     }
 
@@ -48,11 +48,11 @@ public:
     template<typename IndexData>
     void submitIndexData(std::span<IndexData> data, GLDataUsagePattern dataUsagePattern) noexcept {
         bindElementBufferObject();
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, data.size() * sizeof(decltype(data)::value_type), data.data(),
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, data.size() * sizeof(typename decltype(data)::value_type), data.data(),
                      static_cast<GLenum>(dataUsagePattern));
         // TODO: handle the possibility of varying data type for OpenGL indices
         static_assert(sizeof(IndexData::i0) == 4);
-        mNumIndices = data.size() * sizeof(decltype(data)::value_type) / sizeof(IndexData::i0);
+        mNumIndices = data.size() * sizeof(typename decltype(data)::value_type) / sizeof(IndexData::i0);
     }
 
     template<typename IndexData>

@@ -10,6 +10,13 @@
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <vector>
+#include <cstdint>
+
+struct RenderStats {
+    std::uint64_t numBatches{ 0ULL };
+    std::uint64_t numTriangles{ 0ULL };
+    std::uint64_t numVertices{ 0ULL };
+};
 
 class Renderer final {
 public:
@@ -32,13 +39,19 @@ public:
 public:
     Renderer();
 
-    void beginScene() noexcept;
-    void endScene() noexcept;
+    void beginFrame() noexcept;
+    void endFrame() noexcept;
     void drawQuad(const glm::mat4& transform, const ShaderProgram& shader, const Texture& texture) noexcept;
+    [[nodiscard]] const RenderStats& stats() const { return mRenderStats; }
 
 private:
-    static constexpr std::size_t maxVerticesPerBatch = 1000;
+    void flush() noexcept;
+
+private:
+    static constexpr std::size_t maxTrianglesPerBatch = 6000;
+    std::uint64_t mNumTrianglesInCurrentBatch = 0ULL;
     std::vector<VertexData> mVertexData;
     std::vector<IndexData> mIndexData;
     VertexBuffer mVertexBuffer;
+    RenderStats mRenderStats;
 };

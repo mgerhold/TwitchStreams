@@ -2,6 +2,7 @@
 #include "Application.hpp"
 
 #include <spdlog/spdlog.h>
+#include <chrono>
 
 template<typename DerivedType>
 Application<DerivedType>::Application(const std::string& title, WindowSize size, OpenGLVersion version) noexcept {
@@ -37,15 +38,33 @@ Application<DerivedType>::Application(const std::string& title, WindowSize size,
         glDebugMessageCallback(handleOpenGLDebugOutput, nullptr);
         glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
     }
+    if (!glfwExtensionSupported("GL_ARB_direct_state_access")) {
+        glfwTerminate();
+        mError = true;
+        return;
+    }
 }
 
 template<typename DerivedType>
 void Application<DerivedType>::run() noexcept {
+    using namespace std::chrono_literals;
+
     static_cast<DerivedType*>(this)->setup();
+
+    const auto frameTimeOutputInterval = 500ms;
+    auto lastFrameTimeOutput = std::chrono::high_resolution_clock::now() - frameTimeOutputInterval;
+    auto lastTime = std::chrono::high_resolution_clock::now();
     while (!glfwWindowShouldClose(mWindowPtr)) {
         static_cast<DerivedType*>(this)->update();
         glfwSwapBuffers(mWindowPtr);
         glfwPollEvents();
+        const auto currentTime = std::chrono::high_resolution_clock::now();
+        const auto duration = std::chrono::duration<double>(currentTime - lastTime).count();
+        lastTime = currentTime;
+        if (currentTime >= lastFrameTimeOutput + frameTimeOutputInterval) {
+            lastFrameTimeOutput = currentTime;
+            glfwSetWindowTitle(mWindowPtr, fmt::format("{} ms ({} fps)", duration * 1000.0, 1.0 / duration).c_str());
+        }
     }
 }
 

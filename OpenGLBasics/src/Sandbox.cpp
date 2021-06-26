@@ -9,6 +9,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <filesystem>
 #include <string_view>
+#include <chrono>
 
 void Sandbox::setup() noexcept {
 #ifdef DEBUG_BUILD
@@ -73,23 +74,24 @@ void Sandbox::render() noexcept {
             gsl::narrow_cast<float>(-framebufferSize.height / 2), gsl::narrow_cast<float>(framebufferSize.height / 2));
     mShaderProgram.setUniform(Hash::staticHashString("projectionMatrix"), projectionMatrix);
 
-    /*sRenderer::beginScene();
-    sRenderer::drawQuad(modelMatrix, mShaderProgram, mTexture);
-    sRenderer::drawQuad(modelMatrix, mShaderProgram, mTexture);
-    sRenderer::drawQuad(modelMatrix, mShaderProgram, mTexture);
-    sRenderer::drawQuad(modelMatrix, mShaderProgram, mTexture);
-    sRenderer::drawQuad(modelMatrix, mShaderProgram, mTexture);
-    sRenderer::drawQuad(modelMatrix, mShaderProgram, mTexture);
-    sRenderer::endScene();*/
-
-    glClear(GL_COLOR_BUFFER_BIT);
-    mRenderer.beginScene();
-    mRenderer.drawQuad(glm::mat4{ 100.0f }, mShaderProgram, mTexture);
-    auto identityScaled = glm::scale(glm::mat4{ 1.0f }, glm::vec3{ 100.0f });
-    identityScaled = glm::translate(identityScaled, glm::vec3{ 1.0f, 1.0f, 0.0f });
-    mRenderer.drawQuad(identityScaled, mShaderProgram, mTexture);
-    mRenderer.endScene();
-    //glDrawElements(GL_TRIANGLES, gsl::narrow_cast<GLsizei>(mVertexBuffer.indicesCount()), GL_UNSIGNED_INT, nullptr);
+    mRenderer.beginFrame();
+    constexpr int64_t numQuads = 100'000ULL;
+    const auto millisecondsSinceEpoch = std::chrono::duration_cast<std::chrono::milliseconds>(
+                                                std::chrono::high_resolution_clock::now().time_since_epoch())
+                                                .count();
+    const auto angle = static_cast<float>((millisecondsSinceEpoch / 4) % 360);
+    const auto halfHeight = getFramebufferSize().height;
+    for (int64_t i = 0; i < numQuads; ++i) {
+        const auto transform = glm::rotate(
+                glm::scale(glm::translate(glm::mat4{ 1.0f },
+                                          glm::vec3{ -i + numQuads / 2, (i % 100) * 10 - halfHeight, 0.0f }),
+                           glm::vec3{ 100.0f }),
+                glm::radians(angle), glm::vec3{ 0.0f, 0.0f, 1.0f });
+        mRenderer.drawQuad(transform, mShaderProgram, mTexture);
+    }
+    mRenderer.endFrame();
+    const RenderStats& stats = mRenderer.stats();
+    spdlog::info("Stats: {} tris, {} vertices ({} batches)", stats.numTriangles, stats.numVertices, stats.numBatches);
 }
 
 void Sandbox::setupShaders() noexcept {
