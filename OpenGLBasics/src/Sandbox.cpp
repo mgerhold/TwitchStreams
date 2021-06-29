@@ -21,10 +21,18 @@ void Sandbox::setup() noexcept {
     spdlog::info("Number of supported texture units: {}", Texture::getTextureUnitCount());
     auto expectedTexture = Image::LoadFromFile(std::filesystem::current_path() / "assets" / "images" / "nojava.png")
                                    .and_then(Texture::Create);
-
     if (expectedTexture) {
-        mTexture = std::move(expectedTexture.value());
-        spdlog::info("Texture loaded (size {}x{})", mTexture.getWidth(), mTexture.getHeight());
+        mTextures.push_back(std::move(expectedTexture.value()));
+        spdlog::info("Texture loaded (size {}x{})", mTextures.back().getWidth(), mTextures.back().getHeight());
+    } else {
+        spdlog::error("Failed to load texture: {}", expectedTexture.error());
+    }
+
+    expectedTexture = Image::LoadFromFile(std::filesystem::current_path() / "assets" / "images" / "bjarne.jpg")
+                              .and_then(Texture::Create);
+    if (expectedTexture) {
+        mTextures.push_back(std::move(expectedTexture.value()));
+        spdlog::info("Texture loaded (size {}x{})", mTextures.back().getWidth(), mTextures.back().getHeight());
     } else {
         spdlog::error("Failed to load texture: {}", expectedTexture.error());
     }
@@ -46,12 +54,6 @@ void Sandbox::setup() noexcept {
     const std::vector<GLuint> indices{
         0, 1, 2, 2, 3, 0,
     };
-    /*mVertexBuffer.bind();
-    mVertexBuffer.setVertexAttributeLayout(VertexAttributeDefinition{ 2, GL_FLOAT, false },
-                                           VertexAttributeDefinition{ 3, GL_FLOAT, false },
-                                           VertexAttributeDefinition{ 2, GL_FLOAT, false });*/
-    //mVertexBuffer.submitVertexData(vertices, GLDataUsagePattern::StaticDraw);
-    //mVertexBuffer.submitIndexData(indices, GLDataUsagePattern::StaticDraw);
     mShaderProgram.bind();
     glClearColor(73.f / 255.f, 54.f / 255.f, 87.f / 255.f, 1.f);
 }
@@ -75,20 +77,24 @@ void Sandbox::render() noexcept {
     mShaderProgram.setUniform(Hash::staticHashString("projectionMatrix"), projectionMatrix);
 
     mRenderer.beginFrame();
-    constexpr int64_t numQuads = 100'000ULL;
+    /*constexpr int64_t numQuads = 10'000ULL;
     const auto millisecondsSinceEpoch = std::chrono::duration_cast<std::chrono::milliseconds>(
                                                 std::chrono::high_resolution_clock::now().time_since_epoch())
                                                 .count();
     const auto angle = static_cast<float>((millisecondsSinceEpoch / 4) % 360);
     const auto halfHeight = getFramebufferSize().height;
     for (int64_t i = 0; i < numQuads; ++i) {
-        const auto transform = glm::rotate(
-                glm::scale(glm::translate(glm::mat4{ 1.0f },
-                                          glm::vec3{ -i + numQuads / 2, (i % 100) * 10 - halfHeight, 0.0f }),
-                           glm::vec3{ 100.0f }),
-                glm::radians(angle), glm::vec3{ 0.0f, 0.0f, 1.0f });
-        mRenderer.drawQuad(transform, mShaderProgram, mTexture);
-    }
+        mRenderer.drawQuad(glm::vec3{ -i + numQuads / 2, (i % 100) * 10 - halfHeight, 0.0f },
+                           glm::vec3{ 0.0f, 0.0f, 1.0f },
+                           glm::radians(angle),
+                           glm::vec3{ 100.0f },
+                           mShaderProgram,
+                           mTextures.front());
+    }*/
+    mRenderer.drawQuad(glm::vec3{ -100.0f, 0.0f, 0.0f }, glm::vec3{ 0.0f, 0.0f, 1.0f }, 0.0f, glm::vec3{ 100.0f },
+                       mShaderProgram, mTextures.front());
+    mRenderer.drawQuad(glm::vec3{ 100.0f, 0.0f, 0.0f }, glm::vec3{ 0.0f, 0.0f, 1.0f }, 0.0f, glm::vec3{ 100.0f },
+                       mShaderProgram, mTextures.back());
     mRenderer.endFrame();
     const RenderStats& stats = mRenderer.stats();
     spdlog::info("Stats: {} tris, {} vertices ({} batches)", stats.numTriangles, stats.numVertices, stats.numBatches);

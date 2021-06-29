@@ -34,12 +34,13 @@ tl::expected<Texture, std::string> Texture::Create(const Image& image) noexcept 
 }
 
 void Texture::bind(GLint textureUnit) const noexcept {
-    if (textureUnit < 0 || textureUnit >= getTextureUnitCount()) {
+    /*if (textureUnit < 0 || textureUnit >= getTextureUnitCount()) {
         spdlog::error("Cannot bind texture since {} is no valid texture unit.", textureUnit);
         return;
     }
     glActiveTexture(GL_TEXTURE0 + textureUnit);
-    glBindTexture(GL_TEXTURE_2D, mName);
+    glBindTexture(GL_TEXTURE_2D, mName);*/
+    bind(mName, textureUnit);
 }
 
 void Texture::unbind(GLint textureUnit) noexcept {
@@ -104,4 +105,13 @@ int Texture::getHeight() const noexcept {
 
 int Texture::getNumChannels() const noexcept {
     return mNumChannels;
+}
+
+void Texture::bind(GLuint textureName, GLint textureUnit) noexcept {
+    if (textureUnit < 0 || textureUnit >= getTextureUnitCount()) {
+        spdlog::error("Cannot bind texture since {} is no valid texture unit.", textureUnit);
+        return;
+    }
+    glActiveTexture(GL_TEXTURE0 + textureUnit);
+    glBindTexture(GL_TEXTURE_2D, textureName);
 }

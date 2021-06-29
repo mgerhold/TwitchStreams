@@ -6,6 +6,20 @@
 
 namespace GLUtils {
 
+    bool isIntegralType(GLenum dataType) {
+        switch (dataType) {
+            case GL_BYTE:
+            case GL_UNSIGNED_BYTE:
+            case GL_SHORT:
+            case GL_UNSIGNED_SHORT:
+            case GL_INT:
+            case GL_UNSIGNED_INT:
+                return true;
+            default:
+                return false;
+        }
+    }
+
     std::size_t getSizeOfGLType(GLenum dataType) {
         switch (dataType) {
             case GL_BYTE:

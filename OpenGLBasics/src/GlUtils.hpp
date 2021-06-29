@@ -9,6 +9,7 @@
 
 namespace GLUtils {
 
+    bool isIntegralType(GLenum dataType);
     std::size_t getSizeOfGLType(GLenum dataType);
 
 }

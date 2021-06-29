@@ -9,6 +9,7 @@
 #include "VertexBuffer.hpp"
 #include "Texture.hpp"
 #include "Renderer.hpp"
+#include <vector>
 
 class Sandbox final : public Application<Sandbox> {
 public:
@@ -25,7 +26,7 @@ private:
 private:
     VertexBuffer mVertexBuffer;
     ShaderProgram mShaderProgram;
-    Texture mTexture;
+    std::vector<Texture> mTextures;
     Renderer mRenderer;
 
     friend class Application;

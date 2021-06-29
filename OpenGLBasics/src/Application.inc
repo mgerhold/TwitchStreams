@@ -3,6 +3,8 @@
 
 #include <spdlog/spdlog.h>
 #include <chrono>
+#include <vector>
+#include <cmath>
 
 template<typename DerivedType>
 Application<DerivedType>::Application(const std::string& title, WindowSize size, OpenGLVersion version) noexcept {
@@ -30,6 +32,7 @@ Application<DerivedType>::Application(const std::string& title, WindowSize size,
         mError = true;
         return;
     }
+    glfwSwapInterval(0);
     int flags;
     glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
     if (flags & GL_CONTEXT_FLAG_DEBUG_BIT) {
@@ -54,16 +57,19 @@ void Application<DerivedType>::run() noexcept {
     const auto frameTimeOutputInterval = 500ms;
     auto lastFrameTimeOutput = std::chrono::high_resolution_clock::now() - frameTimeOutputInterval;
     auto lastTime = std::chrono::high_resolution_clock::now();
+    constexpr double lerpFactor = 0.999;
+    double frameTime = 0.0;
     while (!glfwWindowShouldClose(mWindowPtr)) {
         static_cast<DerivedType*>(this)->update();
         glfwSwapBuffers(mWindowPtr);
         glfwPollEvents();
         const auto currentTime = std::chrono::high_resolution_clock::now();
         const auto duration = std::chrono::duration<double>(currentTime - lastTime).count();
+        frameTime = std::lerp(duration, frameTime, lerpFactor);
         lastTime = currentTime;
         if (currentTime >= lastFrameTimeOutput + frameTimeOutputInterval) {
             lastFrameTimeOutput = currentTime;
-            glfwSetWindowTitle(mWindowPtr, fmt::format("{} ms ({} fps)", duration * 1000.0, 1.0 / duration).c_str());
+            glfwSetWindowTitle(mWindowPtr, fmt::format("{} ms ({} fps)", frameTime * 1000.0, 1.0 / frameTime).c_str());
         }
     }
 }

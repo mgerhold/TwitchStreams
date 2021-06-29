@@ -21,7 +21,7 @@ add_executable(${TARGET_NAME} src/main.cpp src/Application.hpp src/Application.i
 
 # set warning levels
 if (MSVC)
-    target_compile_options(${TARGET_NAME} PUBLIC /W4 /permissive)
+    target_compile_options(${TARGET_NAME} PUBLIC /W4 /permissive-)
 else()
     target_compile_options(${TARGET_NAME} PUBLIC -Wall -Wextra -pedantic -Wconversion -pthread)
 endif()
@@ -50,3 +50,6 @@ target_link_libraries(${TARGET_NAME} PRIVATE spdlog::spdlog spdlog::spdlog_heade
 
 find_package(glm CONFIG REQUIRED)
 target_link_libraries(${TARGET_NAME} PRIVATE glm::glm)
+
+find_package(range-v3 CONFIG REQUIRED)
+target_link_libraries(${TARGET_NAME} PRIVATE range-v3 range-v3-meta range-v3::meta range-v3-concepts)

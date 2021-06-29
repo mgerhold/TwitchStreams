@@ -3,10 +3,12 @@
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec4 aColor;
 layout (location = 2) in vec2 aTexCoords;
+layout (location = 3) in uint aTexIndex;
 
 out vec4 fragmentColor;
 out vec3 fragmentPosition;
 out vec2 texCoords;
+flat out uint texIndex;
 
 uniform mat4 projectionMatrix;
 
@@ -15,4 +17,5 @@ void main() {
    fragmentPosition = aPos;
    fragmentColor = aColor;
    texCoords = aTexCoords;
+   texIndex = aTexIndex;
 }

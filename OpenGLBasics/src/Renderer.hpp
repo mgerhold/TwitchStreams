@@ -24,10 +24,11 @@ public:
         glm::vec3 position;
         glm::vec4 color;
         glm::vec2 texCoords;
+        GLuint texIndex;
     };
     static_assert(alignof(VertexData) == 4);
     static_assert(sizeof(VertexData[2]) == 2 * sizeof(VertexData));
-    static_assert(sizeof(VertexData) == 9 * sizeof(GLfloat));
+    static_assert(sizeof(VertexData) == 10 * sizeof(GLfloat));
 
     struct IndexData {
         GLuint i0, i1, i2;
@@ -41,8 +42,18 @@ public:
 
     void beginFrame() noexcept;
     void endFrame() noexcept;
-    void drawQuad(const glm::mat4& transform, const ShaderProgram& shader, const Texture& texture) noexcept;
-    [[nodiscard]] const RenderStats& stats() const { return mRenderStats; }
+    void drawQuad(const glm::vec3& translation,
+                  const glm::vec3& rotationAxis,
+                  float rotationAngle,
+                  const glm::vec3& scale,
+                  const ShaderProgram& shader,
+                  const Texture& texture) noexcept;
+    template<typename T = glm::mat4>
+    void drawQuad(T&& transform, const ShaderProgram& shader, const Texture& texture) noexcept;
+    //void drawQuad(const glm::mat4& transform, const ShaderProgram& shader, const Texture& texture) noexcept;
+    [[nodiscard]] const RenderStats& stats() const {
+        return mRenderStats;
+    }
 
 private:
     void flush() noexcept;
@@ -54,4 +65,5 @@ private:
     std::vector<IndexData> mIndexData;
     VertexBuffer mVertexBuffer;
     RenderStats mRenderStats;
+    std::vector<GLuint> mCurrentTextureNames;
 };

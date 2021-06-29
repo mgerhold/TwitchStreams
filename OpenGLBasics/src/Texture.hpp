@@ -36,9 +36,14 @@ public:
     [[nodiscard]] static GLint getTextureUnitCount() noexcept;
 
 private:
+    static void bind(GLuint textureName, GLint textureUnit) noexcept;
+
+private:
     static inline GLint sTextureUnitCount{ 0U };
     int mWidth{ 0U };
     int mHeight{ 0U };
     int mNumChannels{ 0U };
     GLuint mName{ 0U };
+
+    friend class Renderer;
 };

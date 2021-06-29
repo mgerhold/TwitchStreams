@@ -92,9 +92,17 @@ void VertexBuffer::setVertexAttributeLayout(std::convertible_to<VertexAttributeD
     // set vertex attributes
     std::for_each(values.begin(), values.end(),
                   [&location, &offset, stride](const VertexAttributeDefinition& definition) {
-                      glVertexAttribPointer(location, definition.count, definition.type, definition.normalized, stride,
-                                            (void*) offset);
+                      if (GLUtils::isIntegralType(definition.type)) {
+                          glVertexAttribIPointer(location, definition.count, definition.type, stride, (void*) offset);
+                      } else {
+                          glVertexAttribPointer(location, definition.count, definition.type, definition.normalized,
+                                                stride, (void*) offset);
+                      }
                       glEnableVertexAttribArray(location);
+                      spdlog::info(
+                              "Enabled vertex attribute {} (count {}, type {}, normalized {}, stride {}, "
+                              "offset {})",
+                              location, definition.count, definition.type, definition.normalized, stride, offset);
                       ++location;
                       offset += GLUtils::getSizeOfGLType(definition.type) * definition.count;
                   });
