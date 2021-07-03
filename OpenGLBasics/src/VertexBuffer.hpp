@@ -80,7 +80,7 @@ private:
 
 void VertexBuffer::setVertexAttributeLayout(std::convertible_to<VertexAttributeDefinition> auto... args) const {
     bind();
-    auto values = { args... };
+    const auto values = { args... };
     GLuint location{ 0U };
     std::uintptr_t offset{ 0U };
     GLsizei stride{ 0 };

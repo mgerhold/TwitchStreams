@@ -43,27 +43,36 @@ public:
     void beginFrame() noexcept;
     void endFrame() noexcept;
     void drawQuad(const glm::vec3& translation,
-                  const glm::vec3& rotationAxis,
                   float rotationAngle,
                   const glm::vec3& scale,
                   const ShaderProgram& shader,
                   const Texture& texture) noexcept;
     template<typename T = glm::mat4>
     void drawQuad(T&& transform, const ShaderProgram& shader, const Texture& texture) noexcept;
-    //void drawQuad(const glm::mat4& transform, const ShaderProgram& shader, const Texture& texture) noexcept;
     [[nodiscard]] const RenderStats& stats() const {
         return mRenderStats;
     }
 
 private:
-    void flush() noexcept;
+    struct RenderCommand {
+        glm::mat4 transform;
+        glm::vec4 color;
+        GLuint shaderName;
+        GLuint textureName;
+    };
 
 private:
-    static constexpr std::size_t maxTrianglesPerBatch = 6000;
+    void flushCommandBuffer() noexcept;
+    void flushVertexAndIndexData() noexcept;
+
+private:
+    static constexpr std::size_t maxTrianglesPerBatch = 10'000;
     std::uint64_t mNumTrianglesInCurrentBatch = 0ULL;
+    std::vector<RenderCommand> mCommandBuffer;
     std::vector<VertexData> mVertexData;
     std::vector<IndexData> mIndexData;
     VertexBuffer mVertexBuffer;
     RenderStats mRenderStats;
     std::vector<GLuint> mCurrentTextureNames;
+    GLuint mCurrentShaderProgramName{ 0U };
 };

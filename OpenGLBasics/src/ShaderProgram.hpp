@@ -22,7 +22,8 @@ public:
 
     ~ShaderProgram();
 
-    [[nodiscard]] bool compile(std::string_view vertexShaderSource, std::string_view fragmentShaderSource) noexcept;
+    [[nodiscard]] bool compile(const std::string& vertexShaderSource, const std::string& fragmentShaderSource) noexcept;
+    static void bind(GLuint shaderName) noexcept;
     void bind() const noexcept;
     static void unbind() noexcept;
     [[nodiscard]] bool hasBeenCompiled() const noexcept {
@@ -39,4 +40,6 @@ private:
     static GLuint sCurrentlyBoundName;
     GLuint mName{ 0U };
     std::unordered_map<std::size_t, GLint> mUniformLocations;
+
+    friend class Renderer;
 };

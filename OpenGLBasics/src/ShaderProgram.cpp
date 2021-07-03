@@ -30,13 +30,13 @@ ShaderProgram::~ShaderProgram() {
     glDeleteProgram(mName);
 }
 
-bool ShaderProgram::compile(std::string_view vertexShaderSource, std::string_view fragmentShaderSource) noexcept {
+bool ShaderProgram::compile(const std::string& vertexShaderSource, const std::string& fragmentShaderSource) noexcept {
     if (hasBeenCompiled()) {
         glDeleteProgram(mName);
         mName = 0U;
     }
     GLuint vertexShaderName = glCreateShader(GL_VERTEX_SHADER);
-    const GLchar* vertexShaderSourcesArray[] = { vertexShaderSource.data() };
+    const GLchar* vertexShaderSourcesArray[] = { vertexShaderSource.c_str() };
     glShaderSource(vertexShaderName, 1U, vertexShaderSourcesArray, nullptr);
     glCompileShader(vertexShaderName);
     int success;
@@ -50,7 +50,7 @@ bool ShaderProgram::compile(std::string_view vertexShaderSource, std::string_vie
     }
 
     GLuint fragmentShaderName = glCreateShader(GL_FRAGMENT_SHADER);
-    const GLchar* fragmentShaderSourcesArray[] = { fragmentShaderSource.data() };
+    const GLchar* fragmentShaderSourcesArray[] = { fragmentShaderSource.c_str() };
     glShaderSource(fragmentShaderName, 1U, fragmentShaderSourcesArray, nullptr);
     glCompileShader(fragmentShaderName);
     glGetShaderiv(fragmentShaderName, GL_COMPILE_STATUS, &success);
@@ -84,16 +84,19 @@ bool ShaderProgram::compile(std::string_view vertexShaderSource, std::string_vie
     return true;
 }
 
-void ShaderProgram::bind() const noexcept {
-    if (sCurrentlyBoundName != mName) {
-        glUseProgram(mName);
-        sCurrentlyBoundName = mName;
+void ShaderProgram::bind(GLuint shaderName) noexcept {
+    if (sCurrentlyBoundName != shaderName) {
+        glUseProgram(shaderName);
+        sCurrentlyBoundName = shaderName;
     }
 }
 
+void ShaderProgram::bind() const noexcept {
+    bind(mName);
+}
+
 void ShaderProgram::unbind() noexcept {
-    glUseProgram(0U);
-    sCurrentlyBoundName = 0U;
+    bind(0U);
 }
 
 tl::expected<ShaderProgram, std::string> ShaderProgram::generateFromFiles(

@@ -8,9 +8,14 @@
 #include "OpenGLVersion.hpp"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <spdlog/spdlog.h>
+#include <chrono>
+#include <vector>
+#include <cmath>
 #include <string>
 #include <iostream>
 #include <concepts>
+#include <ratio>
 
 template<typename DerivedType>
 class Application {

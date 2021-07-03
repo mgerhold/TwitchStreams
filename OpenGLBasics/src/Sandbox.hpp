@@ -25,7 +25,7 @@ private:
 
 private:
     VertexBuffer mVertexBuffer;
-    ShaderProgram mShaderProgram;
+    std::vector<ShaderProgram> mShaderPrograms;
     std::vector<Texture> mTextures;
     Renderer mRenderer;
 
