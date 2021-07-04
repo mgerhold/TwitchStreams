@@ -64,9 +64,10 @@ private:
 private:
     void flushCommandBuffer() noexcept;
     void flushVertexAndIndexData() noexcept;
+    void addVertexAndIndexDataFromRenderCommand(const RenderCommand& renderCommand);
 
 private:
-    static constexpr std::size_t maxTrianglesPerBatch = 10'000;
+    static constexpr std::size_t maxCommandsPerBatch = 10'000;
     std::uint64_t mNumTrianglesInCurrentBatch = 0ULL;
     std::vector<RenderCommand> mCommandBuffer;
     std::vector<VertexData> mVertexData;

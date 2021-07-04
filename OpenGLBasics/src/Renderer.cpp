@@ -10,9 +10,9 @@
 #include <algorithm>
 
 Renderer::Renderer() {
-    mCommandBuffer.reserve(maxTrianglesPerBatch / 2ULL);
-    mVertexData.reserve(maxTrianglesPerBatch * 3ULL);
-    mIndexData.reserve(maxTrianglesPerBatch * 3ULL);
+    mCommandBuffer.reserve(maxCommandsPerBatch);
+    mVertexData.reserve(maxCommandsPerBatch * 4ULL);
+    mIndexData.reserve(maxCommandsPerBatch * 6ULL);
     mCurrentTextureNames.reserve(std::min(Texture::getTextureUnitCount(), 32));
     spdlog::info("GPU is capable of binding {} textures at a time.", mCurrentTextureNames.capacity());
     mVertexBuffer.setVertexAttributeLayout(
@@ -44,11 +44,10 @@ void Renderer::drawQuad(const glm::vec3& translation,
 
 template<typename T>
 void Renderer::drawQuad(T&& transform, const ShaderProgram& shader, const Texture& texture) noexcept {
-    if (mCommandBuffer.size() < mCommandBuffer.capacity()) {
-        mCommandBuffer.emplace_back(transform, glm::vec4{ 1.0f, 1.0f, 1.0f, 1.0f }, shader.mName, texture.mName);
-    } else {
+    if (mCommandBuffer.size() == mCommandBuffer.capacity()) {
         flushCommandBuffer();
     }
+    mCommandBuffer.emplace_back(transform, glm::vec4{ 1.0f, 1.0f, 1.0f, 1.0f }, shader.mName, texture.mName);
 }
 
 void Renderer::flushCommandBuffer() noexcept {
@@ -74,67 +73,23 @@ void Renderer::flushCommandBuffer() noexcept {
         mIndexData.clear();
         mCurrentTextureNames.clear();
         ShaderProgram::bind(currentStartIt->shaderName);
+        /*spdlog::warn("converting command range {} - {} (shader {})",
+                     std::distance(mCommandBuffer.begin(), currentStartIt),
+                     std::distance(mCommandBuffer.begin(), currentEndIt) - 1, currentStartIt->shaderName);*/
         std::for_each(currentStartIt, currentEndIt, [&](const RenderCommand& renderCommand) {
-            // TODO: use an indirection vector to optimize this as soon as there is a global asset manager
-            int textureIndex = -1;
-            for (std::size_t i = 0; i < mCurrentTextureNames.size(); ++i) {
-                if (mCurrentTextureNames[i] == renderCommand.textureName) {
-                    textureIndex = gsl::narrow_cast<int>(i);
-                    break;
-                }
-            }
-
-            if ((textureIndex < 0 && mCurrentTextureNames.size() == mCurrentTextureNames.capacity()) ||
-                (mNumTrianglesInCurrentBatch + 2ULL > maxTrianglesPerBatch)) {
-                flushVertexAndIndexData();
-            }
-            if (textureIndex < 0) {
-                textureIndex = static_cast<int>(mCurrentTextureNames.size());
-                mCurrentTextureNames.push_back(renderCommand.textureName);
-            }
-
-            // fill buffers
-            const auto indexOffset = mVertexData.size();
-            mVertexData.push_back(
-                    VertexData{ .position = { renderCommand.transform * glm::vec4{ -1.0f, -1.0f, 0.0f, 1.0f } },
-                                .color = { 1.0f, 1.0f, 1.0f, 1.0f },
-                                .texCoords = { 0.0f, 0.0f },
-                                .texIndex = gsl::narrow_cast<GLuint>(textureIndex) });
-            mVertexData.push_back(
-                    VertexData{ .position = { renderCommand.transform * glm::vec4{ 1.0f, -1.0f, 0.0f, 1.0f } },
-                                .color = { 1.0f, 1.0f, 1.0f, 1.0f },
-                                .texCoords = { 1.0f, 0.0f },
-                                .texIndex = gsl::narrow_cast<GLuint>(textureIndex) });
-            mVertexData.push_back(
-                    VertexData{ .position = { renderCommand.transform * glm::vec4{ 1.0f, 1.0f, 0.0f, 1.0f } },
-                                .color = { 1.0f, 1.0f, 1.0f, 1.0f },
-                                .texCoords = { 1.0f, 1.0f },
-                                .texIndex = gsl::narrow_cast<GLuint>(textureIndex) });
-            mVertexData.push_back(
-                    VertexData{ .position = { renderCommand.transform * glm::vec4{ -1.0f, 1.0f, 0.0f, 1.0f } },
-                                .color = { 1.0f, 1.0f, 1.0f, 1.0f },
-                                .texCoords = { 0.0f, 1.0f },
-                                .texIndex = gsl::narrow_cast<GLuint>(textureIndex) });
-            mIndexData.push_back(IndexData{ .i0 = gsl::narrow_cast<GLuint>(indexOffset + 0),
-                                            .i1 = gsl::narrow_cast<GLuint>(indexOffset + 1),
-                                            .i2 = gsl::narrow_cast<GLuint>(indexOffset + 2) });
-            mIndexData.push_back(IndexData{ .i0 = gsl::narrow_cast<GLuint>(indexOffset + 0),
-                                            .i1 = gsl::narrow_cast<GLuint>(indexOffset + 2),
-                                            .i2 = gsl::narrow_cast<GLuint>(indexOffset + 3) });
-            mNumTrianglesInCurrentBatch += 2ULL;
-            mRenderStats.numVertices += 4ULL;
-            mRenderStats.numTriangles += 2ULL;
+            addVertexAndIndexDataFromRenderCommand(renderCommand);
         });
         currentStartIt = currentEndIt;
-        if (currentEndIt != mCommandBuffer.end()) {
+        if (currentEndIt != mCommandBuffer.end()) {// there's at least one more shader to draw with
             currentEndIt = std::upper_bound(
                     currentEndIt, mCommandBuffer.end(), *currentEndIt,
                     [](const RenderCommand& lhs, const RenderCommand& rhs) { return lhs.shaderName < rhs.shaderName; });
-            flushVertexAndIndexData();
         }
+        flushVertexAndIndexData();
     }
     mCommandBuffer.clear();
 }
+
 void Renderer::flushVertexAndIndexData() noexcept {
     if (mVertexData.empty()) {
         return;
@@ -146,10 +101,57 @@ void Renderer::flushVertexAndIndexData() noexcept {
     for (std::size_t i = 0; i < mCurrentTextureNames.size(); ++i) {
         Texture::bind(mCurrentTextureNames[i], gsl::narrow_cast<GLint>(i));
     }
+    //spdlog::warn("drawing {} quads", mVertexBuffer.indicesCount() / 6);
     glDrawElements(GL_TRIANGLES, gsl::narrow_cast<GLsizei>(mVertexBuffer.indicesCount()), GL_UNSIGNED_INT, nullptr);
     mVertexData.clear();
     mIndexData.clear();
     mCurrentTextureNames.clear();
     mNumTrianglesInCurrentBatch = 0ULL;
     mRenderStats.numBatches += 1ULL;
+}
+void Renderer::addVertexAndIndexDataFromRenderCommand(const Renderer::RenderCommand& renderCommand) {
+    // TODO: use an indirection vector to optimize this as soon as there is a global asset manager
+    int textureIndex = -1;
+    for (std::size_t i = 0; i < mCurrentTextureNames.size(); ++i) {
+        if (mCurrentTextureNames[i] == renderCommand.textureName) {
+            textureIndex = gsl::narrow_cast<int>(i);
+            break;
+        }
+    }
+
+    if ((textureIndex < 0 && mCurrentTextureNames.size() == mCurrentTextureNames.capacity()) ||
+        (mNumTrianglesInCurrentBatch + 2ULL > mVertexData.capacity())) {
+        flushVertexAndIndexData();
+    }
+    if (textureIndex < 0) {
+        textureIndex = static_cast<int>(mCurrentTextureNames.size());
+        mCurrentTextureNames.push_back(renderCommand.textureName);
+    }
+
+    const auto indexOffset = mVertexData.size();
+    mVertexData.push_back(VertexData{ .position = { renderCommand.transform * glm::vec4{ -1.0f, -1.0f, 0.0f, 1.0f } },
+                                      .color = { 1.0f, 1.0f, 1.0f, 1.0f },
+                                      .texCoords = { 0.0f, 0.0f },
+                                      .texIndex = gsl::narrow_cast<GLuint>(textureIndex) });
+    mVertexData.push_back(VertexData{ .position = { renderCommand.transform * glm::vec4{ 1.0f, -1.0f, 0.0f, 1.0f } },
+                                      .color = { 1.0f, 1.0f, 1.0f, 1.0f },
+                                      .texCoords = { 1.0f, 0.0f },
+                                      .texIndex = gsl::narrow_cast<GLuint>(textureIndex) });
+    mVertexData.push_back(VertexData{ .position = { renderCommand.transform * glm::vec4{ 1.0f, 1.0f, 0.0f, 1.0f } },
+                                      .color = { 1.0f, 1.0f, 1.0f, 1.0f },
+                                      .texCoords = { 1.0f, 1.0f },
+                                      .texIndex = gsl::narrow_cast<GLuint>(textureIndex) });
+    mVertexData.push_back(VertexData{ .position = { renderCommand.transform * glm::vec4{ -1.0f, 1.0f, 0.0f, 1.0f } },
+                                      .color = { 1.0f, 1.0f, 1.0f, 1.0f },
+                                      .texCoords = { 0.0f, 1.0f },
+                                      .texIndex = gsl::narrow_cast<GLuint>(textureIndex) });
+    mIndexData.push_back(IndexData{ .i0 = gsl::narrow_cast<GLuint>(indexOffset + 0),
+                                    .i1 = gsl::narrow_cast<GLuint>(indexOffset + 1),
+                                    .i2 = gsl::narrow_cast<GLuint>(indexOffset + 2) });
+    mIndexData.push_back(IndexData{ .i0 = gsl::narrow_cast<GLuint>(indexOffset + 0),
+                                    .i1 = gsl::narrow_cast<GLuint>(indexOffset + 2),
+                                    .i2 = gsl::narrow_cast<GLuint>(indexOffset + 3) });
+    mNumTrianglesInCurrentBatch += 2ULL;
+    mRenderStats.numVertices += 4ULL;
+    mRenderStats.numTriangles += 2ULL;
 }
