@@ -12,6 +12,7 @@ set(TARGET_LIST
         Concurrency6
         Concurrency7
         Concurrency8
+        Concurrency9
         )
 
 add_executable(Concurrency main.cpp)
@@ -22,6 +23,7 @@ add_executable(Concurrency5 main5.cpp)
 add_executable(Concurrency6 main6.cpp)
 add_executable(Concurrency7 main7.cpp)
 add_executable(Concurrency8 main8.cpp)
+add_executable(Concurrency9 main9.cpp)
 
 if (MSVC)
     # remove /W3 from defaults and set warning level per target later on
