@@ -4,7 +4,19 @@
 #include <fstream>
 #include <format>
 
-Color rayColor(const Ray& ray) {
+[[nodiscard]] bool hitSphere(const Point3& center, const double radius, const Ray& ray) {
+    const auto sphereCenterToRayOrigin = ray.origin - center;
+    const auto squaredRayDirectionLength = ray.direction.lengthSquared();
+    const auto p = 2.0 * ray.direction.dot(sphereCenterToRayOrigin) / squaredRayDirectionLength;
+    const auto q = (sphereCenterToRayOrigin.lengthSquared() - radius * radius) / squaredRayDirectionLength;
+    const auto discriminant = (p / 2.0) * (p / 2.0) - q;
+    return discriminant > 0.0;
+}
+
+[[nodiscard]] Color rayColor(const Ray& ray) {
+    if (hitSphere(Point3{ 0.0, 0.0, -1.0 }, 0.5, ray)) {
+        return Color{ 1.0, 0.0, 0.0 };
+    }
     const auto normalizedDirection = ray.direction.normalized();
     const auto t = 0.5 * (normalizedDirection.y + 1.0);
     return (1.0 - t) * Color{ 1.0, 1.0, 1.0 } + t * Color{ 0.5, 0.7, 1.0 };
