@@ -12,7 +12,7 @@
 
 constexpr auto maxColorValue = 255;
 
-void writeColor(std::ostream& outStream, Color pixelColor) {
+void writeColor(std::ostream& outStream, const Color& pixelColor) {
     outStream << std::format("{} {} {}", static_cast<int>(std::round(pixelColor.r * maxColorValue)),
                              static_cast<int>(std::round(pixelColor.g * maxColorValue)),
                              static_cast<int>(std::round(pixelColor.b * maxColorValue)));
