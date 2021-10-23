@@ -7,15 +7,15 @@
 [[nodiscard]] double hitSphere(const Point3& center, const double radius, const Ray& ray) {
     const auto sphereCenterToRayOrigin = ray.origin - center;
     const auto squaredRayDirectionLength = ray.direction.lengthSquared();
-    const auto p = 2.0 * ray.direction.dot(sphereCenterToRayOrigin) / squaredRayDirectionLength;
+    const auto halfP = ray.direction.dot(sphereCenterToRayOrigin) / squaredRayDirectionLength;
     const auto q = (sphereCenterToRayOrigin.lengthSquared() - radius * radius) / squaredRayDirectionLength;
-    const auto discriminant = (p / 2.0) * (p / 2.0) - q;
+    const auto discriminant = halfP * halfP - q;
     if (discriminant <= 0.0) {
         return -1.0;
     }
     const auto sqrtResult = std::sqrt(discriminant);
-    const auto t0 = -p / 2 + sqrtResult;
-    const auto t1 = -p / 2 - sqrtResult;
+    const auto t0 = -halfP + sqrtResult;
+    const auto t1 = -halfP - sqrtResult;
     return std::min(t0, t1);
 }
 
