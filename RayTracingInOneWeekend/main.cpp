@@ -1,34 +1,22 @@
 #include "Color.hpp"
 #include "Ray.hpp"
+#include "Hittable.hpp"
+#include "Sphere.hpp"
 #include <iostream>
 #include <fstream>
 #include <format>
+#include <limits>
+#include <vector>
+#include <memory>
 
-[[nodiscard]] double hitSphere(const Point3& center, const double radius, const Ray& ray) {
-    const auto sphereCenterToRayOrigin = ray.origin - center;
-    const auto squaredRayDirectionLength = ray.direction.lengthSquared();
-    const auto minusHalfP = -ray.direction.dot(sphereCenterToRayOrigin) / squaredRayDirectionLength;
-    const auto q = (sphereCenterToRayOrigin.lengthSquared() - radius * radius) / squaredRayDirectionLength;
-    const auto discriminant = minusHalfP * minusHalfP - q;
-    if (discriminant <= 0.0) {
-        return -1.0;
-    }
-    const auto sqrtResult = std::sqrt(discriminant);
-    const auto t0 = minusHalfP + sqrtResult;
-    const auto t1 = minusHalfP - sqrtResult;
-    return std::min(t0, t1);
-}
-
-[[nodiscard]] Color rayColor(const Ray& ray) {
-    constexpr auto sphereOrigin = Point3{ 0.0, 0.0, -1.0 };
-    const auto t = hitSphere(sphereOrigin, 0.5, ray);
-    if (t > 0.0) {
-        const auto normal = (ray.evaluate(t) - sphereOrigin).normalized();
-        return 0.5 * (normal + Vec3{ 1.0, 1.0, 1.0 });
-    }
+[[nodiscard]] Color backgroundGradient(const Ray& ray) {
     const auto normalizedDirection = ray.direction.normalized();
     const auto colorInterpolationParam = 0.5 * (normalizedDirection.y + 1.0);
     return (1.0 - colorInterpolationParam) * Color{ 1.0, 1.0, 1.0 } + colorInterpolationParam * Color{ 0.5, 0.7, 1.0 };
+}
+
+[[nodiscard]] Color rayColor(const Vec3& normal) {
+    return 0.5 * (normal + Vec3{ 1.0, 1.0, 1.0 });
 }
 
 int main() {
@@ -49,6 +37,11 @@ int main() {
     constexpr auto lowerLeftCorner =
             origin - horizontalDimension / 2 - verticalDimension / 2 - Vec3{ 0.0, 0.0, focalLength };
 
+    // geometry
+    std::vector<std::unique_ptr<Hittable>> hittables;
+    hittables.emplace_back(std::make_unique<Sphere>(Point3{ 0.0, 0.0, -1.0 }, 0.5));
+    hittables.emplace_back(std::make_unique<Sphere>(Point3{ 0.0, -100.5, -1.0 }, 100.0));
+
     std::ofstream outFileStream{ "image.ppm" };
     // header
     outFileStream << std::format("P3\n{} {}\n{}\n", imageWidth, imageHeight, maxColorValue);
@@ -62,7 +55,30 @@ int main() {
             const auto ray =
                     Ray{ .origin{ origin },
                          .direction{ lowerLeftCorner + u * horizontalDimension + v * verticalDimension - origin } };
-            const auto pixelColor = rayColor(ray);
+            auto minT = std::numeric_limits<double>::min();
+            bool hitSomething = false;
+            std::size_t hittableIndex = 0;
+
+            for (std::size_t i = 0; i < hittables.size(); ++i) {
+                const auto hitResult = hittables[i]->hit(ray, 0.0, std::numeric_limits<double>::max());
+                if (hitResult) {
+                    if (!hitSomething || hitResult.value() < minT) {
+                        minT = hitResult.value();
+                        hitSomething = true;
+                        hittableIndex = i;
+                    }
+                }
+            }
+
+            const auto pixelColor = [&]() {
+                if (hitSomething) {
+                    const auto outwardsNormal = hittables[hittableIndex]->normal(ray.evaluate(minT));
+                    const auto frontFace = outwardsNormal.dot(ray.direction) < 0.0;
+                    const auto normal = (frontFace ? outwardsNormal : -outwardsNormal);
+                    return rayColor(normal);
+                }
+                return backgroundGradient(ray);
+            }();
             writeColor(outFileStream, pixelColor);
             outFileStream << '\n';
         }

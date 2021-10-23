@@ -16,7 +16,7 @@ endif ()
 
 set(TARGET_LIST RayTracingInOneWeekend)
 
-add_executable(RayTracingInOneWeekend main.cpp Vec3.hpp Color.hpp Ray.hpp)
+add_executable(RayTracingInOneWeekend main.cpp Vec3.hpp Color.hpp Ray.hpp Hittable.hpp Sphere.hpp Utility.hpp)
 
 foreach (target ${TARGET_LIST})
     # set warning levels
