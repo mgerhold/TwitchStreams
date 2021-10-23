@@ -4,22 +4,31 @@
 #include <fstream>
 #include <format>
 
-[[nodiscard]] bool hitSphere(const Point3& center, const double radius, const Ray& ray) {
+[[nodiscard]] double hitSphere(const Point3& center, const double radius, const Ray& ray) {
     const auto sphereCenterToRayOrigin = ray.origin - center;
     const auto squaredRayDirectionLength = ray.direction.lengthSquared();
     const auto p = 2.0 * ray.direction.dot(sphereCenterToRayOrigin) / squaredRayDirectionLength;
     const auto q = (sphereCenterToRayOrigin.lengthSquared() - radius * radius) / squaredRayDirectionLength;
     const auto discriminant = (p / 2.0) * (p / 2.0) - q;
-    return discriminant > 0.0;
+    if (discriminant <= 0.0) {
+        return -1.0;
+    }
+    const auto sqrtResult = std::sqrt(discriminant);
+    const auto t0 = -p / 2 + sqrtResult;
+    const auto t1 = -p / 2 - sqrtResult;
+    return std::min(t0, t1);
 }
 
 [[nodiscard]] Color rayColor(const Ray& ray) {
-    if (hitSphere(Point3{ 0.0, 0.0, -1.0 }, 0.5, ray)) {
-        return Color{ 1.0, 0.0, 0.0 };
+    constexpr auto sphereOrigin = Point3{ 0.0, 0.0, -1.0 };
+    const auto t = hitSphere(sphereOrigin, 0.5, ray);
+    if (t > 0.0) {
+        const auto normal = (ray.evaluate(t) - sphereOrigin).normalized();
+        return 0.5 * (normal + Vec3{ 1.0, 1.0, 1.0 });
     }
     const auto normalizedDirection = ray.direction.normalized();
-    const auto t = 0.5 * (normalizedDirection.y + 1.0);
-    return (1.0 - t) * Color{ 1.0, 1.0, 1.0 } + t * Color{ 0.5, 0.7, 1.0 };
+    const auto colorInterpolationParam = 0.5 * (normalizedDirection.y + 1.0);
+    return (1.0 - colorInterpolationParam) * Color{ 1.0, 1.0, 1.0 } + colorInterpolationParam * Color{ 0.5, 0.7, 1.0 };
 }
 
 int main() {
