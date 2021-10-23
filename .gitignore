@@ -267,3 +267,5 @@ Concurrency/cmake-build-release/
 OpenGLBasics/RenderDoc Capture Settings.cap
 OpenGLBasics/.vs/
 OpenGLBasics/out/
+RayTracingInOneWeekend/cmake-build-debug/
+RayTracingInOneWeekend/cmake-build-release/
