@@ -66,7 +66,7 @@ struct Vec3 {
         return std::sqrt(lengthSquared());
     }
 
-    [[nodiscard]]  double lengthSquared() const {
+    [[nodiscard]] constexpr double lengthSquared() const {
         return x * x + y * y + z * z;
     }
 
