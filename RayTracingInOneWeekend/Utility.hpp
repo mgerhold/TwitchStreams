@@ -37,10 +37,19 @@ public:
     [[nodiscard]] static Vec3 randomVecInsideUnitSphere() {
         while (true) {
             const auto vec = randomVec3(-1.0, 1.0);
-            if (vec.lengthSquared() < 1.0) {
+            if ((vec.x != 0.0 || vec.y != 0.0 || vec.z != 0.0) && vec.lengthSquared() < 1.0) {
                 return vec;
             }
         }
+    }
+
+    [[nodiscard]] static Vec3 randomUnitVector() {
+        return randomVecInsideUnitSphere().normalized();
+    }
+
+    [[nodiscard]] static Vec3 randomVecInsideHemisphere(const Vec3& normal) {
+        const auto result = randomVecInsideUnitSphere();
+        return normal.dot(result) > 0.0 ? result : -result;
     }
 
 private:

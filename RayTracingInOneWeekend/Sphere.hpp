@@ -5,11 +5,16 @@
 #pragma once
 
 #include "Hittable.hpp"
+#include "Material.hpp"
+#include <memory>
 
 class Sphere : public Hittable {
 public:
     Sphere() = default;
-    Sphere(const Point3& center, const double radius) : center{ center }, radius{ radius } { }
+    Sphere(const Point3& center, const double radius, std::shared_ptr<Material> material)
+        : center{ center },
+          radius{ radius },
+          material{ std::move(material) } { }
 
     [[nodiscard]] std::optional<double> hit(const Ray& ray, double tMin, double tMax) const override {
         const auto sphereCenterToRayOrigin = ray.origin - center;
@@ -35,11 +40,17 @@ public:
         return {};
     }
 
-    [[nodiscard]] Vec3 normal(const Point3& intersectionPoint) const override {
-        return (intersectionPoint - center).normalized();
+    [[nodiscard]] IntersectionInfo getIntersectionInfo(const Ray& ray, const double t) const override {
+        IntersectionInfo result;
+        result.intersectionPoint = ray.evaluate(t);
+        const auto outwardsNormal = (result.intersectionPoint - center).normalized();
+        result.setFaceNormal(ray, outwardsNormal);
+        result.material = material;
+        return result;
     }
 
 public:
     Point3 center;
     double radius;
+    std::shared_ptr<Material> material;
 };

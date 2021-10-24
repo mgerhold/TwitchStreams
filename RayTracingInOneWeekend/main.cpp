@@ -4,6 +4,7 @@
 #include "Sphere.hpp"
 #include "Camera.hpp"
 #include "Utility.hpp"
+#include <chrono>
 #include <iostream>
 #include <fstream>
 #include <format>
@@ -27,7 +28,8 @@ using World = std::vector<std::unique_ptr<Hittable>>;
     bool hitSomething = false;
     std::size_t hittableIndex = 0;
     for (std::size_t i = 0; i < world.size(); ++i) {
-        const auto hitResult = world[i]->hit(ray, 0.0, std::numeric_limits<double>::max());
+        const auto hitResult =
+                world[i]->hit(ray, 0.001, std::numeric_limits<double>::max());
         if (hitResult) {
             if (!hitSomething || hitResult.value() < minT) {
                 minT = hitResult.value();
@@ -39,32 +41,39 @@ using World = std::vector<std::unique_ptr<Hittable>>;
     if (!hitSomething) {
         return backgroundGradient(ray);
     }
-    const auto pointOfCollision = ray.evaluate(minT);
-    const auto collisionNormal = world[hittableIndex]->normal(pointOfCollision);// normalized
+    const auto intersectionInfo = world[hittableIndex]->getIntersectionInfo(ray, minT);
 
-    const auto outwardsNormal = collisionNormal;
-    const auto frontFace = outwardsNormal.dot(ray.direction) < 0.0;
-    const auto normal = (frontFace ? outwardsNormal : -outwardsNormal);
+    const auto scatterResult = intersectionInfo.material->scatter(ray, intersectionInfo);
+    if (!scatterResult) {
+        return Color{};
+    }
+    return scatterResult->attenuation * rayColor(scatterResult->ray, world, depth - 1);
+}
 
-    const auto newRayTarget = pointOfCollision + normal + Random::randomVecInsideUnitSphere();
-    const auto newRayDirection = newRayTarget - pointOfCollision;
-    const auto newRay = Ray{ .origin{ pointOfCollision + normal * 0.001 },
-                             .direction{ newRayDirection } };
-    return 0.5 * rayColor(newRay, world, depth - 1);
+[[nodiscard]] Color gammaCorrection(const Color& color) {
+    return Color{ std::sqrt(color.r), std::sqrt(color.g), std::sqrt(color.b) };
 }
 
 int main() {
     // image dimensions
-    constexpr auto imageWidth = 400;
+    constexpr auto imageWidth = 1920;
     constexpr auto imageHeight = static_cast<int>(imageWidth / Camera::aspectRatio);
     constexpr auto samplesPerPixel = 100;
     constexpr auto maxDepth = 50;
 
-    // geometry
-    World world;
-    world.emplace_back(std::make_unique<Sphere>(Point3{ 0.0, 0.0, -1.0 }, 0.5));
-    world.emplace_back(std::make_unique<Sphere>(Point3{ 0.0, -100.5, -1.0 }, 100.0));
+    // generate the world
+    const auto materialGround = std::make_shared<Lambertian>(Color{ 0.8, 0.8, 0.0 });
+    const auto materialCenter = std::make_shared<Lambertian>(Color{ 0.7, 0.3, 0.3 });
+    const auto materialLeft = std::make_shared<Metal>(Color{ 0.8, 0.8, 0.8 }, 0.3);
+    const auto materialRight = std::make_shared<Metal>(Color{ 0.8, 0.6, 0.2 }, 1.0);
 
+    World world;
+    world.emplace_back(std::make_unique<Sphere>(Point3{ 0.0, -100.5, -1.0 }, 100.0, materialGround));
+    world.emplace_back(std::make_unique<Sphere>(Point3{ 0.0, 0.0, -1.0 }, 0.5, materialCenter));
+    world.emplace_back(std::make_unique<Sphere>(Point3{ -1.0, 0.0, -1.0 }, 0.5, materialLeft));
+    world.emplace_back(std::make_unique<Sphere>(Point3{ 1.0, 0.0, -1.0 }, 0.5, materialRight));
+
+    const auto startTime = std::chrono::high_resolution_clock::now();
     std::ofstream outFileStream{ "image.ppm" };
     // header
     outFileStream << std::format("P3\n{} {}\n{}\n", imageWidth, imageHeight, maxColorValue);
@@ -80,8 +89,13 @@ int main() {
                 const auto ray = Camera::getRay(u, v);
                 pixelColor += rayColor(ray, world, maxDepth);
             }
-            writeColor(outFileStream, pixelColor / static_cast<double>(samplesPerPixel));
+            pixelColor /= static_cast<double>(samplesPerPixel);
+            pixelColor = gammaCorrection(pixelColor);
+            writeColor(outFileStream, pixelColor);
         }
     }
     outFileStream.close();
+    const auto endTime = std::chrono::high_resolution_clock::now();
+    const auto duration = std::chrono::duration<double>(endTime - startTime).count();
+    std::cerr << std::format("Elapsed time: {} s\n", duration);
 }

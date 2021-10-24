@@ -62,6 +62,10 @@ struct Vec3 {
         return Vec3{ x * scalar, y * scalar, z * scalar };
     }
 
+    [[nodiscard]] inline friend constexpr Vec3 operator*(const double scalar, const Vec3& vector) {
+        return vector * scalar;
+    }
+
     [[nodiscard]] constexpr Vec3 operator/(const double scalar) const {
         return (*this) * (1.0 / scalar);
     }
@@ -86,6 +90,15 @@ struct Vec3 {
         return *this / length();
     }
 
+    [[nodiscard]] bool isNearZero() const {
+        constexpr auto epsilon = 1e-8;
+        return (std::abs(x) < epsilon && std::abs(y) < epsilon && std::abs(z) < epsilon);
+    }
+
+    [[nodiscard]] Vec3 reflect(const Vec3& normal) const {
+        return *this - 2.0 * this->dot(normal) * normal;
+    }
+
     union {
         double x;
         double r;
@@ -103,10 +116,6 @@ struct Vec3 {
 inline std::ostream& operator<<(std::ostream& outStream, const Vec3& vector) {
     outStream << std::format("{} {} {}", vector.x, vector.y, vector.z);
     return outStream;
-}
-
-inline constexpr Vec3 operator*(const double scalar, const Vec3& vector) {
-    return vector * scalar;
 }
 
 using Point3 = Vec3;
