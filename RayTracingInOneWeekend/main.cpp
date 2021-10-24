@@ -56,7 +56,7 @@ using World = std::vector<std::unique_ptr<Hittable>>;
 
 int main() {
     // image dimensions
-    constexpr auto imageWidth = 1920;
+    constexpr auto imageWidth = 400;
     constexpr auto imageHeight = static_cast<int>(imageWidth / Camera::aspectRatio);
     constexpr auto samplesPerPixel = 100;
     constexpr auto maxDepth = 50;
