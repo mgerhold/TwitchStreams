@@ -19,7 +19,10 @@ using World = std::vector<std::unique_ptr<Hittable>>;
     return (1.0 - colorInterpolationParam) * Color{ 1.0, 1.0, 1.0 } + colorInterpolationParam * Color{ 0.5, 0.7, 1.0 };
 }
 
-[[nodiscard]] Color rayColor(const Ray& ray, const World& world) {
+[[nodiscard]] Color rayColor(const Ray& ray, const World& world, int depth) {
+    if (depth <= 0) {
+        return Color{};
+    }
     auto minT = std::numeric_limits<double>::min();
     bool hitSomething = false;
     std::size_t hittableIndex = 0;
@@ -36,10 +39,18 @@ using World = std::vector<std::unique_ptr<Hittable>>;
     if (!hitSomething) {
         return backgroundGradient(ray);
     }
-    const auto outwardsNormal = world[hittableIndex]->normal(ray.evaluate(minT));
+    const auto pointOfCollision = ray.evaluate(minT);
+    const auto collisionNormal = world[hittableIndex]->normal(pointOfCollision);// normalized
+
+    const auto outwardsNormal = collisionNormal;
     const auto frontFace = outwardsNormal.dot(ray.direction) < 0.0;
     const auto normal = (frontFace ? outwardsNormal : -outwardsNormal);
-    return 0.5 * (normal + Vec3{ 1.0, 1.0, 1.0 });
+
+    const auto newRayTarget = pointOfCollision + normal + Random::randomVecInsideUnitSphere();
+    const auto newRayDirection = newRayTarget - pointOfCollision;
+    const auto newRay = Ray{ .origin{ pointOfCollision + normal * 0.001 },
+                             .direction{ newRayDirection } };
+    return 0.5 * rayColor(newRay, world, depth - 1);
 }
 
 int main() {
@@ -47,6 +58,7 @@ int main() {
     constexpr auto imageWidth = 400;
     constexpr auto imageHeight = static_cast<int>(imageWidth / Camera::aspectRatio);
     constexpr auto samplesPerPixel = 100;
+    constexpr auto maxDepth = 50;
 
     // geometry
     World world;
@@ -66,7 +78,7 @@ int main() {
                 const auto u = (static_cast<double>(x) + Random::randomDouble()) / static_cast<double>(imageWidth);
                 const auto v = (static_cast<double>(y) + Random::randomDouble()) / static_cast<double>(imageHeight);
                 const auto ray = Camera::getRay(u, v);
-                pixelColor += rayColor(ray, world);
+                pixelColor += rayColor(ray, world, maxDepth);
             }
             writeColor(outFileStream, pixelColor / static_cast<double>(samplesPerPixel));
         }

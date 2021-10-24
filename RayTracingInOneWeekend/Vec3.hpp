@@ -13,6 +13,10 @@ struct Vec3 {
     constexpr Vec3() : x{ 0.0 }, y{ 0.0 }, z{ 0.0 } { }
     constexpr Vec3(double v0, double v1, double v2) : x{ v0 }, y{ v1 }, z{ v2 } { }
 
+    [[nodiscard]] constexpr bool operator==(const Vec3& other) const {
+        return (x == other.x && y == other.y && z == other.z);
+    }
+
     [[nodiscard]] constexpr Vec3 operator-() const {
         return Vec3{ -x, -y, -z };
     }

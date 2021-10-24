@@ -5,9 +5,11 @@
 #pragma once
 
 #include "Vec3.hpp"
+#include <cassert>
 
 struct Ray {
     Point3 evaluate(double t) const {
+        assert(direction != Vec3{});
         return origin + t * direction;
     }
 

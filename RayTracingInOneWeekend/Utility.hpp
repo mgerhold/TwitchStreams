@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "Vec3.hpp"
 #include <limits>
 #include <random>
 #include <numbers>
@@ -20,11 +21,29 @@ public:
         return mDistribution(mRandomEngine);
     }
 
-    [[nodiscard]] static double randomDouble(double minInclusive, double maxExclusive) {
+    [[nodiscard]] static double randomDouble(const double minInclusive, const double maxExclusive) {
         return minInclusive + randomDouble() * (maxExclusive - minInclusive);
+    }
+
+    [[nodiscard]] static Vec3 randomVec3() {
+        return Vec3{ randomDouble(), randomDouble(), randomDouble() };
+    }
+
+    [[nodiscard]] static Vec3 randomVec3(const double minInclusive, const double maxExclusive) {
+        return Vec3{ randomDouble(minInclusive, maxExclusive), randomDouble(minInclusive, maxExclusive),
+                     randomDouble(minInclusive, maxExclusive) };
+    }
+
+    [[nodiscard]] static Vec3 randomVecInsideUnitSphere() {
+        while (true) {
+            const auto vec = randomVec3(-1.0, 1.0);
+            if (vec.lengthSquared() < 1.0) {
+                return vec;
+            }
+        }
     }
 
 private:
     static inline std::mt19937_64 mRandomEngine{};
-    static inline std::uniform_real_distribution<double> mDistribution{0.0, 1.0};
+    static inline std::uniform_real_distribution<double> mDistribution{ 0.0, 1.0 };
 };
