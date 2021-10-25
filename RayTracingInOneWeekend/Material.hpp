@@ -37,9 +37,9 @@ public:
 
 class Lambertian : public Material {
 public:
-    Lambertian(Color albedo) : albedo{ albedo } { }
+    explicit Lambertian(Color albedo) : albedo{ albedo } { }
 
-    std::optional<ScatterResult> scatter(const Ray&, const IntersectionInfo& intersectionInfo) override {
+    [[nodiscard]] std::optional<ScatterResult> scatter(const Ray&, const IntersectionInfo& intersectionInfo) override {
         const auto newRayDirection = [&]() {
             const auto temp = intersectionInfo.normal + Random::randomUnitVector();
             return temp.isNearZero() ? intersectionInfo.normal : temp;
@@ -47,32 +47,59 @@ public:
         // alternatively use Random::randomVecInsideUnitSphere() or Random::randomVecInsideHemisphere(normal)
         // to generate the scattered ray target
         return ScatterResult{ .attenuation{ albedo },
-                              .ray{ Ray{ .origin{ intersectionInfo.intersectionPoint },
-                                         .direction{ newRayDirection } } } };
+                              .ray{ Ray{ intersectionInfo.intersectionPoint, newRayDirection } } };
     }
 
 public:
-    Color albedo;
+    const Color albedo;
 };
 
 class Metal : public Material {
 public:
     Metal(Color albedo, double fuzz) : albedo{ albedo }, fuzz{ fuzz } { }
 
-    std::optional<ScatterResult> scatter(const Ray& intersectionRay,
-                                         const IntersectionInfo& intersectionInfo) override {
+    [[nodiscard]] std::optional<ScatterResult> scatter(const Ray& intersectionRay,
+                                                       const IntersectionInfo& intersectionInfo) override {
         const auto reflected = intersectionRay.direction.normalized().reflect(intersectionInfo.normal) +
                                fuzz * Random::randomVecInsideUnitSphere();
-        ScatterResult result;
-        result.attenuation = albedo;
-        result.ray = Ray{ .origin{ intersectionInfo.intersectionPoint }, .direction{ reflected } };
-        if (result.ray.direction.dot(intersectionInfo.normal) > 0) {
-            return result;
-        }
-        return {};
+        return ScatterResult{ .attenuation{ albedo }, .ray{ Ray{ intersectionInfo.intersectionPoint, reflected } } };
     }
 
 public:
-    Color albedo;
-    double fuzz;
+    const Color albedo;
+    const double fuzz;
+};
+
+class Dielectric : public Material {
+public:
+    explicit Dielectric(double refractionIndex) : refractionIndex{ refractionIndex } { }
+
+    [[nodiscard]] std::optional<ScatterResult> scatter(const Ray& intersectionRay,
+                                                       const IntersectionInfo& intersectionInfo) override {
+        constexpr auto airRefractionIndex = 1.0;
+        const auto refractionIndexRatio = intersectionInfo.isFrontFace ? (airRefractionIndex / refractionIndex)
+                                                                       : (refractionIndex / airRefractionIndex);
+        assert(std::abs(intersectionRay.direction.lengthSquared() - 1.0) <= 0.001);
+        const auto cosTheta = std::min(-intersectionRay.direction.dot(intersectionInfo.normal), 1.0);
+        const auto sinTheta = std::sqrt(1.0 - cosTheta * cosTheta);
+        const auto cannotRefract = (refractionIndexRatio * sinTheta > 1.0);
+        const auto outgoingRayDirection = [&]() {
+            if (cannotRefract || reflectance(cosTheta, refractionIndexRatio) > Random::randomDouble()) {
+                return intersectionRay.direction.reflect(intersectionInfo.normal);
+            }
+            return intersectionRay.direction.refract(intersectionInfo.normal, refractionIndexRatio);
+        }();
+        return ScatterResult{ .attenuation{ Color{ 1.0, 1.0, 1.0 } },
+                              .ray{ Ray{ intersectionInfo.intersectionPoint, outgoingRayDirection } } };
+    }
+
+public:
+    const double refractionIndex;
+
+private:
+    [[nodiscard]] static double reflectance(const double cosTheta, const double refractionIndexRatio) {
+        auto r0 = (1.0 - refractionIndexRatio) / (1.0 + refractionIndexRatio);
+        r0 *= r0;
+        return r0 + (1.0 - r0) * std::pow((1.0 - cosTheta), 5.0);
+    }
 };

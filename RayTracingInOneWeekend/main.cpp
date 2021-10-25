@@ -28,8 +28,7 @@ using World = std::vector<std::unique_ptr<Hittable>>;
     bool hitSomething = false;
     std::size_t hittableIndex = 0;
     for (std::size_t i = 0; i < world.size(); ++i) {
-        const auto hitResult =
-                world[i]->hit(ray, 0.001, std::numeric_limits<double>::max());
+        const auto hitResult = world[i]->hit(ray, 0.001, std::numeric_limits<double>::max());
         if (hitResult) {
             if (!hitSomething || hitResult.value() < minT) {
                 minT = hitResult.value();
@@ -56,22 +55,47 @@ using World = std::vector<std::unique_ptr<Hittable>>;
 
 int main() {
     // image dimensions
-    constexpr auto imageWidth = 400;
+    constexpr auto imageWidth = 400.0;
     constexpr auto imageHeight = static_cast<int>(imageWidth / Camera::aspectRatio);
     constexpr auto samplesPerPixel = 100;
     constexpr auto maxDepth = 50;
 
     // generate the world
-    const auto materialGround = std::make_shared<Lambertian>(Color{ 0.8, 0.8, 0.0 });
-    const auto materialCenter = std::make_shared<Lambertian>(Color{ 0.7, 0.3, 0.3 });
-    const auto materialLeft = std::make_shared<Metal>(Color{ 0.8, 0.8, 0.8 }, 0.3);
-    const auto materialRight = std::make_shared<Metal>(Color{ 0.8, 0.6, 0.2 }, 1.0);
-
     World world;
-    world.emplace_back(std::make_unique<Sphere>(Point3{ 0.0, -100.5, -1.0 }, 100.0, materialGround));
-    world.emplace_back(std::make_unique<Sphere>(Point3{ 0.0, 0.0, -1.0 }, 0.5, materialCenter));
-    world.emplace_back(std::make_unique<Sphere>(Point3{ -1.0, 0.0, -1.0 }, 0.5, materialLeft));
-    world.emplace_back(std::make_unique<Sphere>(Point3{ 1.0, 0.0, -1.0 }, 0.5, materialRight));
+    const auto materialGround = std::make_shared<Lambertian>(Color{ 0.5, 0.5, 0.5 });
+    world.emplace_back(std::make_unique<Sphere>(Point3{ 0.0, -1000.0, -1.0 }, 1000.0, materialGround));
+
+    for (int i = -11; i < 11; ++i) {
+        for (int j = -11; j < 11; ++j) {
+            const auto center = Point3{ static_cast<double>(i) + 0.9 * Random::randomDouble(), 0.2,
+                                        static_cast<double>(j) + 0.9 * Random::randomDouble() };
+            if((center - Point3{ 4.0, 0.2, 0.0}).length() > 0.9) {
+                const auto chooseMat = Random::randomDouble();
+                std::shared_ptr<Material> material;
+                if (chooseMat < 0.8) {
+                    const auto albedo = Random::randomVec3() * Random::randomVec3();
+                    material = std::make_shared<Lambertian>(albedo);
+                    world.emplace_back(std::make_unique<Sphere>(center, 0.2, material));
+                } else if (chooseMat < 0.95) {
+                    const auto albedo = Random::randomVec3(0.5, 1.0);
+                    const auto fuzz = Random::randomDouble(0.0, 0.5);
+                    material = std::make_shared<Metal>(albedo, fuzz);
+                    world.emplace_back(std::make_unique<Sphere>(center, 0.2, material));
+                } else {
+                    material = std::make_shared<Dielectric>(1.5);
+                    world.emplace_back(std::make_unique<Sphere>(center, 0.2, material));
+                }
+            }
+        }
+    }
+    auto material1 = std::make_shared<Dielectric>(1.5);
+    world.emplace_back(std::make_unique<Sphere>(Point3(0, 1, 0), 1.0, material1));
+
+    auto material2 = std::make_shared<Lambertian>(Color(0.4, 0.2, 0.1));
+    world.emplace_back(std::make_unique<Sphere>(Point3(-4, 1, 0), 1.0, material2));
+
+    auto material3 = std::make_shared<Metal>(Color(0.7, 0.6, 0.5), 0.0);
+    world.emplace_back(std::make_unique<Sphere>(Point3(4, 1, 0), 1.0, material3));
 
     const auto startTime = std::chrono::high_resolution_clock::now();
     std::ofstream outFileStream{ "image.ppm" };

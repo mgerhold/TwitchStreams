@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <cassert>
 #include <cmath>
 #include <iostream>
 #include <format>
@@ -97,6 +98,16 @@ struct Vec3 {
 
     [[nodiscard]] Vec3 reflect(const Vec3& normal) const {
         return *this - 2.0 * this->dot(normal) * normal;
+    }
+
+    [[nodiscard]] Vec3 refract(const Vec3& normal, const double refractionIndexRatio) const {
+        assert(std::abs(lengthSquared() - 1.0) <= 0.01);
+        assert(std::abs(normal.lengthSquared() - 1.0) <= 0.01);
+        const auto cosTheta = std::min(-(*this).dot(normal), 1.0);
+        const auto outDirectionPerpendicular = refractionIndexRatio * (*this + cosTheta * normal);
+        const auto outDirectionParallel =
+                -std::sqrt(std::abs(1.0 - outDirectionPerpendicular.lengthSquared())) * normal;
+        return outDirectionPerpendicular + outDirectionParallel;
     }
 
     union {

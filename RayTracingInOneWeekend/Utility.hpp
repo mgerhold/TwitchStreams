@@ -52,6 +52,15 @@ public:
         return normal.dot(result) > 0.0 ? result : -result;
     }
 
+    [[nodiscard]] static Vec3 randomInsideUnitDisk() {
+        while (true) {
+            const auto result = Vec3{ randomDouble(-1.0, 1.0), randomDouble(-1.0, 1.0), 0.0 };
+            if (result.lengthSquared() < 1.0) {
+                return result;
+            }
+        }
+    }
+
 private:
     static inline std::mt19937_64 mRandomEngine{};
     static inline std::uniform_real_distribution<double> mDistribution{ 0.0, 1.0 };

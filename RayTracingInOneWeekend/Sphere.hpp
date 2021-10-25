@@ -43,7 +43,7 @@ public:
     [[nodiscard]] IntersectionInfo getIntersectionInfo(const Ray& ray, const double t) const override {
         IntersectionInfo result;
         result.intersectionPoint = ray.evaluate(t);
-        const auto outwardsNormal = (result.intersectionPoint - center).normalized();
+        const auto outwardsNormal = (result.intersectionPoint - center) / radius;
         result.setFaceNormal(ray, outwardsNormal);
         result.material = material;
         return result;

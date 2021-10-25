@@ -8,11 +8,13 @@
 #include <cassert>
 
 struct Ray {
-    Point3 evaluate(double t) const {
+    Ray(Point3 origin, Vec3 direction) : origin{ origin }, direction{ direction.normalized() } { }
+
+    [[nodiscard]] Point3 evaluate(double t) const {
         assert(direction != Vec3{});
         return origin + t * direction;
     }
 
-    Point3 origin;
-    Vec3 direction;
+    const Point3 origin;
+    const Vec3 direction;
 };
