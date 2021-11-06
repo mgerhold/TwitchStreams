@@ -269,3 +269,5 @@ OpenGLBasics/.vs/
 OpenGLBasics/out/
 RayTracingInOneWeekend/cmake-build-debug/
 RayTracingInOneWeekend/cmake-build-release/
+Encryption/build/
+Encryption/*~
