@@ -4,6 +4,7 @@
 #include "Sphere.hpp"
 #include "Camera.hpp"
 #include "Utility.hpp"
+#include "stb_image_write.h"
 #include <chrono>
 #include <iostream>
 #include <fstream>
@@ -11,6 +12,7 @@
 #include <limits>
 #include <vector>
 #include <memory>
+#include <cstdint>
 
 using World = std::vector<std::unique_ptr<Hittable>>;
 
@@ -55,9 +57,9 @@ using World = std::vector<std::unique_ptr<Hittable>>;
 
 int main() {
     // image dimensions
-    constexpr auto imageWidth = 1200.0;
+    constexpr auto imageWidth = 1200;
     constexpr auto imageHeight = static_cast<int>(imageWidth / Camera::aspectRatio);
-    constexpr auto samplesPerPixel = 500;
+    constexpr auto samplesPerPixel = 100;
     constexpr auto maxDepth = 50;
 
     // generate the world
@@ -69,7 +71,7 @@ int main() {
         for (int j = -11; j < 11; ++j) {
             const auto center = Point3{ static_cast<double>(i) + 0.9 * Random::randomDouble(), 0.2,
                                         static_cast<double>(j) + 0.9 * Random::randomDouble() };
-            if((center - Point3{ 4.0, 0.2, 0.0}).length() > 0.9) {
+            if ((center - Point3{ 4.0, 0.2, 0.0 }).length() > 0.9) {
                 const auto chooseMat = Random::randomDouble();
                 std::shared_ptr<Material> material;
                 if (chooseMat < 0.8) {
@@ -98,9 +100,8 @@ int main() {
     world.emplace_back(std::make_unique<Sphere>(Point3(4, 1, 0), 1.0, material3));
 
     const auto startTime = std::chrono::high_resolution_clock::now();
-    std::ofstream outFileStream{ "image.ppm" };
-    // header
-    outFileStream << std::format("P3\n{} {}\n{}\n", imageWidth, imageHeight, maxColorValue);
+
+    std::vector<std::uint8_t> imageBuffer(static_cast<std::size_t>(imageWidth * imageHeight * 4));
 
     // pixel data
     for (auto y = imageHeight - 1; y >= 0; --y) {
@@ -115,11 +116,13 @@ int main() {
             }
             pixelColor /= static_cast<double>(samplesPerPixel);
             pixelColor = gammaCorrection(pixelColor);
-            writeColor(outFileStream, pixelColor);
+            writeColor(imageBuffer, imageWidth, x, y, pixelColor);
         }
     }
-    outFileStream.close();
     const auto endTime = std::chrono::high_resolution_clock::now();
     const auto duration = std::chrono::duration<double>(endTime - startTime).count();
     std::cerr << std::format("Elapsed time: {} s\n", duration);
+    stbi_flip_vertically_on_write(true);
+    const auto result = stbi_write_png("raytracer.png", imageWidth, imageHeight, 4, imageBuffer.data(), 4 * imageWidth);
+    assert(result);
 }
