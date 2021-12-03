@@ -59,7 +59,7 @@ int main() {
     // image dimensions
     constexpr auto imageWidth = 1200;
     constexpr auto imageHeight = static_cast<int>(imageWidth / Camera::aspectRatio);
-    constexpr auto samplesPerPixel = 100;
+    constexpr auto samplesPerPixel = 500;
     constexpr auto maxDepth = 50;
 
     // generate the world
