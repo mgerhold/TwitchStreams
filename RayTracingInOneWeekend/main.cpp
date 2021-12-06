@@ -6,13 +6,20 @@
 #include "Utility.hpp"
 #include "stb_image_write.h"
 #include <chrono>
+#include <deque>
 #include <iostream>
 #include <fstream>
+#include <functional>
 #include <format>
 #include <limits>
-#include <vector>
 #include <memory>
+#include <mutex>
+#include <thread>
+#include <type_traits>
+#include <utility>
+#include <vector>
 #include <cstdint>
+#include <cstring>
 
 using World = std::vector<std::unique_ptr<Hittable>>;
 
@@ -53,6 +60,44 @@ using World = std::vector<std::unique_ptr<Hittable>>;
 
 [[nodiscard]] Color gammaCorrection(const Color& color) {
     return Color{ std::sqrt(color.r), std::sqrt(color.g), std::sqrt(color.b) };
+}
+
+[[nodiscard]] auto createWorkerLambda(int startLine,
+                                      int endLine,
+                                      int imageWidth,
+                                      int imageHeight,
+                                      const World& world,
+                                      std::vector<std::uint8_t>& imageBuffer,
+                                      std::mutex& imageBufferMutex,
+                                      int samplesPerPixel,
+                                      int maxDepth) {
+    return [imageWidth, imageHeight, &world, localBuffer = imageBuffer, &imageBuffer, &imageBufferMutex,
+            samplesPerPixel, startLine, endLine, maxDepth]() mutable {
+        std::cout << std::format("Calculating from line {} to line {}...\n", startLine, endLine) << std::flush;
+        for (auto y = startLine; y <= endLine; ++y) {
+            for (int x = 0; x < imageWidth; ++x) {
+                Color pixelColor{};
+                for (int sample = 0; sample < samplesPerPixel; ++sample) {
+                    const auto u = (static_cast<double>(x) + Random::randomDouble()) / static_cast<double>(imageWidth);
+                    const auto v = (static_cast<double>(y) + Random::randomDouble()) / static_cast<double>(imageHeight);
+                    const auto ray = Camera::getRay(u, v);
+                    pixelColor += rayColor(ray, world, maxDepth);
+                }
+                pixelColor /= static_cast<double>(samplesPerPixel);
+                pixelColor = gammaCorrection(pixelColor);
+                writeColor(localBuffer, imageWidth, x, y, pixelColor);
+            }
+        }
+        constexpr auto pixelSize = sizeof(std::uint8_t) * 4;
+        const auto offset = (imageWidth * startLine) * pixelSize;
+        const auto size = (endLine - startLine + 1) * imageWidth * pixelSize;
+        {
+            // write the data into the outside buffer
+            auto bufferLock = std::scoped_lock{ imageBufferMutex };
+            std::memcpy(imageBuffer.data() + offset, localBuffer.data() + offset, size);
+        }
+        std::cout << std::format("Finished calculating lines {} to {}...\n", startLine, endLine) << std::flush;
+    };
 }
 
 int main() {
@@ -102,22 +147,42 @@ int main() {
     const auto startTime = std::chrono::high_resolution_clock::now();
 
     std::vector<std::uint8_t> imageBuffer(static_cast<std::size_t>(imageWidth * imageHeight * 4));
+    std::mutex imageBufferMutex;
 
-    // pixel data
-    for (auto y = imageHeight - 1; y >= 0; --y) {
-        std::cerr << std::format("Scanlines remaining: {}\n", y) << std::flush;
-        for (int x = 0; x < imageWidth; ++x) {
-            Color pixelColor{};
-            for (int sample = 0; sample < samplesPerPixel; ++sample) {
-                const auto u = (static_cast<double>(x) + Random::randomDouble()) / static_cast<double>(imageWidth);
-                const auto v = (static_cast<double>(y) + Random::randomDouble()) / static_cast<double>(imageHeight);
-                const auto ray = Camera::getRay(u, v);
-                pixelColor += rayColor(ray, world, maxDepth);
+    const auto numThreads =
+            (std::thread::hardware_concurrency() == 0 ? 4 : std::thread::hardware_concurrency() * 7 / 8);
+    const auto numTasks = numThreads * 2;
+    const int linesPerTask = imageHeight / numTasks;
+    std::deque<std::function<void(void)>> tasks;
+
+    int currentEndLine = linesPerTask;
+    while (currentEndLine < imageHeight - 1) {
+        const auto newEndLine = std::min(currentEndLine + linesPerTask, imageHeight - 1);
+        tasks.push_back(createWorkerLambda(currentEndLine, newEndLine, imageWidth, imageHeight, world, imageBuffer,
+                                           imageBufferMutex, samplesPerPixel, maxDepth));
+        currentEndLine = newEndLine;
+    }
+    std::mutex mTasksMutex;
+    std::cout << std::format("Total image height: {}\n", imageHeight);
+    std::vector<std::jthread> workerThreads;
+    for (std::remove_cv_t<decltype(numThreads)> i = 0; i < numThreads; ++i) {
+        workerThreads.emplace_back([&tasks, &mTasksMutex]() {
+            while (true) {
+                std::function<void(void)> task;
+                {
+                    auto lock = std::scoped_lock{ mTasksMutex };
+                    if (tasks.empty()) {
+                        break;
+                    }
+                    task = std::move(tasks.front());
+                    tasks.pop_front();
+                }
+                task();
             }
-            pixelColor /= static_cast<double>(samplesPerPixel);
-            pixelColor = gammaCorrection(pixelColor);
-            writeColor(imageBuffer, imageWidth, x, y, pixelColor);
-        }
+        });
+    }
+    for (auto& thread : workerThreads) {
+        thread.join();
     }
     const auto endTime = std::chrono::high_resolution_clock::now();
     const auto duration = std::chrono::duration<double>(endTime - startTime).count();
